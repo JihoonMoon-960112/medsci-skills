@@ -4,6 +4,8 @@
 
 A collection of Claude Code skills covering the full medical research lifecycle -- from literature search to manuscript revision. Built by physicians and researchers, battle-tested on real publications.
 
+![check-reporting demo](demo.gif)
+
 ## Skills
 
 ```
