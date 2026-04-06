@@ -1,5 +1,7 @@
 # Medical Research Skills for Claude Code
 
+![Medical Research Skills](assets/social-preview.png)
+
 A collection of Claude Code skills covering the full medical research lifecycle -- from literature search to manuscript revision. Built by physicians and researchers, battle-tested on real publications.
 
 ## Skills
