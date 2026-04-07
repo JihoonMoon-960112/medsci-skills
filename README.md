@@ -2,16 +2,16 @@
 
 # MedSci Skills
 
-**15 skills that actually work.** Built by a physician-researcher, tested on real publications.
+**16 skills that actually work.** Built by a physician-researcher, tested on real publications.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Skills](https://img.shields.io/badge/Skills-15-brightgreen?style=flat-square)
+![Skills](https://img.shields.io/badge/Skills-16-brightgreen?style=flat-square)
 ![Platform](https://img.shields.io/badge/Platform-Claude_Code-blueviolet?style=flat-square)
 ![Built by](https://img.shields.io/badge/Built_by-Physician--Researcher-blue?style=flat-square)
 
 ![Medical Research Skills](assets/social-preview.png)
 
-*Literature Search &rarr; Study Design &rarr; Statistics &rarr; Figures &rarr; Writing &rarr; Compliance &rarr; Revision &rarr; Presentation*
+*Literature Search &rarr; Full-Text Retrieval &rarr; Study Design &rarr; Statistics &rarr; Figures &rarr; Writing &rarr; Compliance &rarr; Revision &rarr; Presentation*
 
 </div>
 
@@ -45,9 +45,9 @@
             (new/messy projects)              │                    (proposals)
                   │                           │
                   ▼                           ▼
-Literature Review -> Study Design -> Analysis -> Figures -> Writing -> Reporting -> Revision -> Presenting
-      |                  |              |           |          |            |            |           |
-  search-lit       design-study   analyze-stats make-figures write-paper check-reporting revise present-paper
+Literature Review -> Full-Text -> Study Design -> Analysis -> Figures -> Writing -> Reporting -> Revision -> Presenting
+      |                  |              |              |           |          |            |            |           |
+  search-lit    fulltext-retrieval design-study  analyze-stats make-figures write-paper check-reporting revise present-paper
                                                                 |             |
                                                            self-review   manage-project
                                                                 |
@@ -65,9 +65,10 @@ Literature Review -> Study Design -> Analysis -> Figures -> Writing -> Reporting
 | Skill | What It Does |
 |-------|-------------|
 | **orchestrate** | Single entry point for the full bundle. Classifies your request and routes to the right skill -- or chains multiple skills for multi-step workflows. Start here if you're unsure which skill to use. |
-| **search-lit** | PubMed + Semantic Scholar + bioRxiv search with anti-hallucination citation verification. Full-text OA retrieval pipeline (Unpaywall, PMC, OpenAlex). |
-| **check-reporting** | Manuscript compliance audit against 15 reporting guidelines and risk of bias tools (STROBE, STARD, TRIPOD+AI, PRISMA, PRISMA-DTA, ARRIVE, QUADAS-2, RoB 2, ROBINS-I, PROBAST, NOS, and more). |
-| **analyze-stats** | Statistical analysis code generation (Python/R) for diagnostic accuracy, DTA meta-analysis (bivariate/HSROC), inter-rater agreement, survival analysis, and demographics tables. |
+| **search-lit** | PubMed + Semantic Scholar + bioRxiv search with anti-hallucination citation verification. Token-efficient error handling -- CrossRef failures are silently batched, not repeated. |
+| **fulltext-retrieval** | Batch open-access PDF downloader. Unpaywall → PMC → OpenAlex → CrossRef pipeline. OA-only -- no paywall bypass. Input: DOI list or TSV. |
+| **check-reporting** | Manuscript compliance audit against 15 reporting guidelines and risk of bias tools (STROBE, STARD, TRIPOD+AI, PRISMA, PRISMA-DTA, ARRIVE, QUADAS-2, RoB 2, ROBINS-I, PROBAST, NOS, and more). Includes Results/Discussion section boundary check. |
+| **analyze-stats** | Statistical analysis code generation (Python/R) for diagnostic accuracy, DTA meta-analysis (bivariate/HSROC), inter-rater agreement, survival analysis, and demographics tables. Calibration mandatory for prediction models. |
 | **meta-analysis** | Full systematic review and meta-analysis pipeline (8 phases). DTA (bivariate/HSROC) and intervention meta-analysis. Protocol to submission-ready manuscript with PRISMA-DTA compliance. |
 | **make-figures** | Publication-ready figures: ROC curves, forest plots, PRISMA/CONSORT/STARD flow diagrams, Kaplan-Meier curves, Bland-Altman plots, confusion matrices. |
 | **design-study** | Study design review: identifies analysis unit, cohort logic, data leakage risks, comparator design, validation strategy, and reporting guideline fit. |
@@ -75,7 +76,7 @@ Literature Review -> Study Design -> Analysis -> Figures -> Writing -> Reporting
 | **grant-builder** | Structures grant proposals: significance, innovation, approach, milestones, and consortium roles. |
 | **present-paper** | Academic presentation preparation: paper analysis, supporting research, speaker scripts, slide note injection, and Q&A prep. |
 | **publish-skill** | Convert personal Claude Code skills into distributable, open-source-ready packages. PII audit, license compatibility check, generalization, and packaging workflow. |
-| **write-paper** | Full IMRAD manuscript pipeline (8 phases). Outline to submission-ready manuscript with critic-fixer loops, AI pattern avoidance, and journal compliance. |
+| **write-paper** | Full IMRAD manuscript pipeline (8 phases). Outline to submission-ready manuscript with critic-fixer loops, AI pattern avoidance, and journal compliance. Anti-interpretation guardrails in Results; interactive Discussion planning with anchor paper input. |
 | **self-review** | Pre-submission self-review from reviewer perspective. 10 categories with research-type branching (AI, observational, educational, meta-analysis, case report, surgical). Anticipated Major/Minor format with severity framing and optional R0 numbering for `/revise` pipeline. |
 | **revise** | Response to reviewers with tracked changes. Parses decision letters, classifies comments as MAJOR/MINOR/REBUTTAL, generates point-by-point responses and cover letter. |
 | **manage-project** | Research project scaffolding and progress tracking. Commands: init, status, sync-memory, checklist, timeline. Backwards submission timelines and pre-submission checklists. |
@@ -103,16 +104,19 @@ After copying, restart Claude Code. Skills are automatically discovered from `~/
 ## Key Features
 
 ### Anti-Hallucination Citations
-Every reference produced by `search-lit` is verified against PubMed, Semantic Scholar, or CrossRef APIs. No citation is ever generated from memory alone.
+Every reference produced by `search-lit` is verified against PubMed, Semantic Scholar, or CrossRef APIs. No citation is ever generated from memory alone. API errors are batched silently -- no token waste from repeated failure messages.
 
-### 15 Reporting Guidelines & RoB Tools Built-in
-`check-reporting` includes STROBE, STARD, TRIPOD+AI, PRISMA, PRISMA-DTA, ARRIVE, QUADAS-2, RoB 2, ROBINS-I, PROBAST, and NOS checklists. CONSORT, CARE, SPIRIT, and CLAIM are supported via knowledge-based assessment (checklists not bundled due to license restrictions).
+### 16 Reporting Guidelines & RoB Tools Built-in
+`check-reporting` includes STROBE, STARD, TRIPOD+AI, PRISMA, PRISMA-DTA, ARRIVE, QUADAS-2, RoB 2, ROBINS-I, PROBAST, and NOS checklists. CONSORT, CARE, SPIRIT, and CLAIM are supported via knowledge-based assessment (checklists not bundled due to license restrictions). Now includes Results/Discussion section boundary checks.
 
 ### Publication-Ready Output
-`analyze-stats` generates reproducible Python/R code. `make-figures` produces journal-specification figures (300 DPI, colorblind-safe palettes, proper dimensions).
+`analyze-stats` generates reproducible Python/R code with mandatory calibration for prediction models. `make-figures` produces journal-specification figures (300 DPI, colorblind-safe palettes, proper dimensions) with a tool selection guide (D2 for flow diagrams, matplotlib for data plots).
+
+### Results/Discussion Boundary Enforcement
+`write-paper` enforces strict separation: Results contain only factual findings (no interpretation, no "why"), Discussion uses interactive anchor-paper scaffolding. The critic rubric includes a dedicated Section Boundaries pass/fail gate.
 
 ### Skills Work Together
-Skills can call each other. For example, `check-reporting` can invoke `make-figures` to generate a PRISMA flow diagram, or `analyze-stats` to fill in missing statistical details.
+Skills call each other. `check-reporting` invokes `make-figures` for PRISMA diagrams. `write-paper` calls `search-lit` for citation verification. `self-review` delegates reporting compliance to `check-reporting`.
 
 ## Requirements
 
@@ -133,6 +137,7 @@ Skills can call each other. For example, `check-reporting` can invoke `make-figu
 **"I'm starting a meta-analysis and need to find relevant studies."**
 ```
 /search-lit            # Systematic search across PubMed + Semantic Scholar
+/fulltext-retrieval    # Batch download open-access PDFs for included studies
 /meta-analysis         # Full DTA or intervention MA pipeline
 /make-figures          # Forest plot + PRISMA flow diagram
 /check-reporting       # Audit against PRISMA-DTA checklist
