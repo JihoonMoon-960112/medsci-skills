@@ -87,7 +87,13 @@ def unpaywall_lookup(doi: str, email: str) -> str | None:
                 return loc["url_for_pdf"]
         if best and best.get("url"):
             return best["url"]
-    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError) as e:
+    except urllib.error.HTTPError as e:
+        if e.code == 422:
+            log.warning("Unpaywall rejected email '%s' (HTTP 422). "
+                        "Use a real email address, not example.com.", email)
+        else:
+            log.debug("Unpaywall error for %s: %s", doi, e)
+    except (urllib.error.URLError, json.JSONDecodeError) as e:
         log.debug("Unpaywall error for %s: %s", doi, e)
     return None
 
@@ -294,8 +300,33 @@ def process_doi(doi: str, outdir: Path, email: str,
     if outpath.exists():
         outpath.unlink(missing_ok=True)
 
-    # Step 1: DOI-based OA candidates
-    for url in gather_candidates(doi, email):
+    # Step 1: Unpaywall direct PDF URL (fastest path)
+    uw_url = unpaywall_lookup(doi, email)
+    if uw_url and ".pdf" in uw_url.lower():
+        if download_pdf(uw_url, outpath, email):
+            return "oa"
+        time.sleep(0.3)
+
+    # Step 2: PMC (try before slow landing-page scraping)
+    pmcid = id_to_pmcid(pmid, email) if pmid else None
+    if not pmcid:
+        pmcid = id_to_pmcid(doi, email)
+    if pmcid and download_pmc_pdf(pmcid, outpath, email):
+        return "pmc"
+
+    # Step 3: OA candidates from OpenAlex, Crossref, landing pages
+    candidates: list[str] = []
+    if uw_url and uw_url not in candidates:
+        candidates.append(uw_url)
+    for v in openalex_lookup(doi, email):
+        if v not in candidates:
+            candidates.append(v)
+    for v in crossref_lookup(doi, email):
+        if v not in candidates:
+            candidates.append(v)
+    candidates.append(f"https://doi.org/{doi}")
+
+    for url in candidates:
         if ".pdf" in url.lower():
             ok = download_pdf(url, outpath, email)
         else:
@@ -303,13 +334,6 @@ def process_doi(doi: str, outdir: Path, email: str,
         if ok:
             return "oa"
         time.sleep(0.3)
-
-    # Step 2: PMC (PMID → PMCID, then DOI → PMCID)
-    pmcid = id_to_pmcid(pmid, email) if pmid else None
-    if not pmcid:
-        pmcid = id_to_pmcid(doi, email)
-    if pmcid and download_pmc_pdf(pmcid, outpath, email):
-        return "pmc"
 
     return "fail"
 
