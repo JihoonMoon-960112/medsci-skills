@@ -3,7 +3,7 @@ name: grant-builder
 description: >
   Grant and challenge proposal support for radiology and medical AI projects. Structures significance,
   innovation, approach, milestones, and consortium roles while keeping claims evidence-based and executable.
-  Triggers: grant, proposal, aims page, 연구과제, 제안서, 챌린지 제안서, significance, innovation, approach
+triggers: grant, proposal, aims page, grant proposal, significance, innovation, approach, milestones
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---

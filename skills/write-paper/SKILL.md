@@ -1,6 +1,6 @@
 ---
 name: write-paper
-description: Full-pipeline medical/scientific paper writing. 8-phase IMRAD workflow from outline to submission-ready manuscript. Supports original articles, case reports, meta-analyses, AI validation studies, animal studies, and technical notes. Do NOT trigger for reviewing others' papers (peer-review) or self-checking (self-review).
+description: Full-pipeline medical/scientific paper writing. 8-phase IMRAD workflow from outline to submission-ready manuscript. Supports original articles, case reports, meta-analyses, AI validation studies, animal studies, and technical notes. Do NOT trigger for self-checking (use self-review instead).
 triggers: write paper, manuscript, draft paper, start writing, write methods, write results, write discussion, write introduction
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
@@ -198,7 +198,7 @@ Write these LAST because they frame the paper and depend on knowing what was act
 Final quality pass before submission.
 
 **Actions (in order):**
-1. Call `/humanize` to scan for and remove AI writing patterns (see AI Pattern Avoidance below).
+1. Scan for and remove AI writing patterns (see AI Pattern Avoidance below).
 2. Call `/check-reporting` to verify reporting guideline compliance.
 3. Call `/search-lit` to verify all citations are real and correctly referenced.
 4. Call `/self-review` as a final pre-submission gate.
@@ -332,7 +332,7 @@ This skill orchestrates other skills at specific phases:
 |-------|-------------|---------|
 | 2 | `/analyze-stats` | Statistical analysis for tables |
 | 2 | `/make-figures` | Figure generation |
-| 7 | `/humanize` | AI pattern removal |
+| 7 | (built-in) | AI pattern removal |
 | 7 | `/check-reporting` | Reporting guideline compliance |
 | 7 | `/search-lit` | Citation verification |
 | 7 | `/self-review` | Final pre-submission check |

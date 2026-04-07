@@ -1,7 +1,7 @@
 ---
 name: check-reporting
 description: Check manuscript compliance with medical research reporting guidelines. Supports 15 guidelines including STROBE, CONSORT, STARD, TRIPOD+AI, ARRIVE, PRISMA, PRISMA-DTA, CARE, SPIRIT, CLAIM, and risk of bias tools (QUADAS-2, RoB 2, ROBINS-I, PROBAST, NOS). Generates item-by-item assessment with PRESENT/MISSING/PARTIAL status.
-triggers: checklist, reporting guideline, 보고 가이드라인, STROBE, CONSORT, STARD, TRIPOD, PRISMA, PRISMA-DTA, ARRIVE, CARE, CLAIM, SPIRIT, QUADAS, RoB, ROBINS, PROBAST, NOS, risk of bias, compliance check
+triggers: checklist, reporting guideline, STROBE, CONSORT, STARD, TRIPOD, PRISMA, PRISMA-DTA, ARRIVE, CARE, CLAIM, SPIRIT, QUADAS, RoB, ROBINS, PROBAST, NOS, risk of bias, compliance check
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---

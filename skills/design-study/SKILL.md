@@ -3,7 +3,8 @@ name: design-study
 description: >
   Study design and validity review for radiology and medical AI research. Identifies analysis unit,
   cohort logic, leakage risks, comparator design, validation strategy, and reporting guideline fit before
-  drafting or submission. Triggers: study design, leakage check, cohort design, analysis plan, 설계 점검, 연구 설계
+  drafting or submission.
+triggers: study design, leakage check, cohort design, analysis plan, validation strategy, comparator design, bias check
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---
@@ -190,7 +191,7 @@ Escalate to redesign only when the central claim is not defensible otherwise.
 
 - route to `analyze-stats` when the design is basically sound but analysis details need refinement
 - route to `check-reporting` after the design is locked
-- route to `peer-review` when this review is being used inside manuscript assessment
+- route to `self-review` when the user wants a pre-submission quality check on their own manuscript
 - route back to `write-paper` only after the main validity risks are documented
 
 ---

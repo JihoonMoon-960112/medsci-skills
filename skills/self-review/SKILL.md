@@ -1,6 +1,6 @@
 ---
 name: self-review
-description: Pre-submission self-review for the user's own manuscripts, applying a reviewer perspective. Checks for data leakage, missing CIs, overclaiming, intended use gaps, calibration absence, and reporting completeness. Do NOT trigger for reviewing someone else's paper -- that's the peer-review skill.
+description: Pre-submission self-review for the user's own manuscripts, applying a reviewer perspective. Checks for data leakage, missing CIs, overclaiming, intended use gaps, calibration absence, and reporting completeness.
 triggers: self-review, pre-submission check, check my paper, reviewer perspective, manuscript self-check
 tools: Read, Write, Edit, Grep, Glob
 model: inherit
@@ -156,7 +156,7 @@ After presenting the report, offer to help fix specific issues:
 - Does not write the paper or rewrite entire sections
 - Does not generate fake data or fabricate results
 - Does not guarantee acceptance -- it reduces preventable reviewer criticism
-- Does not replace the peer-review skill (which reviews others' papers)
+- Does not replace formal peer review by an external reviewer
 
 ## Tone
 

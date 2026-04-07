@@ -15,6 +15,12 @@ A collection of Claude Code skills covering the full medical research lifecycle 
                               │  the right skill or chains them  │
                               └───────────────┬─────────────────┘
                                               │
+                  ┌───────────────────────────┼───────────────────────────┐
+                  │                           │                           │
+            intake-project              (main pipeline)             grant-builder
+            (new/messy projects)              │                    (proposals)
+                  │                           │
+                  ▼                           ▼
 Literature Review -> Study Design -> Analysis -> Figures -> Writing -> Reporting -> Revision -> Presenting
       |                  |              |           |          |            |            |           |
   search-lit       design-study   analyze-stats make-figures write-paper check-reporting revise present-paper

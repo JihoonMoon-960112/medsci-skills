@@ -3,7 +3,7 @@ name: publish-skill
 description: >
   Convert a personal Claude Code skill into a distributable, open-source-ready skill.
   Runs PII audit, generalization, license compatibility check, and packaging workflow.
-  Triggers: publish skill, distribute skill, open-source skill, package skill, universalize skill
+triggers: publish skill, distribute skill, open-source skill, package skill, universalize skill
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---

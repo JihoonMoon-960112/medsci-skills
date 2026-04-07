@@ -1,7 +1,7 @@
 ---
 name: analyze-stats
 description: Statistical analysis for medical research papers. Generates reproducible Python/R code with publication-ready tables and figures. Supports diagnostic accuracy, inter-rater agreement, meta-analysis, survival analysis, survey data, and group comparisons.
-triggers: statistics, statistical analysis, 통계분석, analyze data, run stats, table 1, demographics table, ROC curve, agreement analysis, ICC, kappa, survival analysis, Kaplan-Meier, group comparison
+triggers: statistics, statistical analysis, analyze data, run stats, table 1, demographics table, ROC curve, agreement analysis, ICC, kappa, survival analysis, Kaplan-Meier, group comparison
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---

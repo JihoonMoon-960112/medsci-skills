@@ -1,7 +1,7 @@
 ---
 name: make-figures
 description: Generate publication-ready figures for medical research papers. Supports ROC curves, forest plots, CONSORT/STARD/PRISMA flow diagrams, calibration plots, Kaplan-Meier curves, Bland-Altman plots, confusion matrices, and pipeline diagrams. All figures meet journal specifications with proper dimensions, fonts, and colorblind-safe palettes.
-triggers: figure, plot, graph, diagram, 그림, ROC curve, forest plot, flow diagram, CONSORT diagram, PRISMA flow, visualization, chart
+triggers: figure, plot, graph, diagram, ROC curve, forest plot, flow diagram, CONSORT diagram, PRISMA flow, visualization, chart
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---

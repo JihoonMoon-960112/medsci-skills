@@ -40,7 +40,7 @@
 - [ ] Supplementary materials labeled correctly
 
 **AI Writing**
-- [ ] Humanizer pass completed (/humanize)
+- [ ] AI pattern removal pass completed
 - [ ] No prohibited AI patterns in manuscript
 - [ ] No prohibited hedging phrases (interestingly, arguably, needless to say)
 

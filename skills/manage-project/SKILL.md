@@ -224,7 +224,7 @@ Generate a pre-submission checklist covering all quality dimensions.
 - [ ] Supplementary materials labeled correctly
 
 **AI Writing**
-- [ ] Humanizer pass completed (/humanize)
+- [ ] AI pattern removal pass completed
 - [ ] No prohibited AI patterns in manuscript
 - [ ] No prohibited hedging phrases (interestingly, arguably, needless to say)
 
@@ -254,7 +254,7 @@ Week -7 (2026-03-13): Methods draft -> critic pass
 Week -6 (2026-03-20): Results draft -> critic pass + /analyze-stats complete
 Week -5 (2026-03-27): Discussion draft -> critic pass
 Week -4 (2026-04-03): Introduction + Abstract -> critic pass
-Week -3 (2026-04-10): /humanize pass + /check-reporting (reporting guideline)
+Week -3 (2026-04-10): AI pattern removal + /check-reporting (reporting guideline)
 Week -2 (2026-04-17): /self-review + co-author review
 Week -1 (2026-04-24): Final revisions + figures at 300 DPI + /lit verification
 SUBMISSION (2026-05-01): Upload to journal portal
@@ -351,7 +351,7 @@ When called from `/manage-project init`, automatically:
 After `/manage-project checklist`, recommend calling:
 - `/self-review` for manuscript quality gate
 - `/search-lit` to verify all citations
-- `/humanize` for AI pattern removal
+- AI pattern removal (built into `/write-paper` Phase 7)
 
 ---
 
@@ -365,6 +365,6 @@ After `/manage-project checklist`, recommend calling:
 - 4 = Results (critic >= 85)
 - 5 = Discussion (critic >= 85)
 - 6 = Introduction + Abstract (critic >= 85)
-- 7 = Polish complete (humanize + checklist + self-review >= 80)
+- 7 = Polish complete (AI pattern removal + checklist + self-review >= 80)
 
 **Phase status values:** `pending | in_progress | complete | blocked`

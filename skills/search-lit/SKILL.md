@@ -1,7 +1,7 @@
 ---
 name: search-lit
 description: Literature search and citation management for medical research. Searches PubMed, Semantic Scholar, and bioRxiv/medRxiv with verified citations. Anti-hallucination — every reference verified via API before inclusion. Generates BibTeX entries.
-triggers: literature search, find papers, 문헌검색, citation, references, bibliography, PubMed search, related work
+triggers: literature search, find papers, citation, references, bibliography, PubMed search, related work
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---
@@ -371,6 +371,6 @@ Embase has no public API. Use Chrome browser automation (MCP) to search and expo
 ## What This Skill Does NOT Do
 
 - Does not download from paywalled journals without user-provided credentials or institutional access.
-- Does not assess the quality of evidence (use `/analyze-stats` or `/peer-review` for that).
+- Does not assess the quality of evidence (use `/analyze-stats` or `/check-reporting` for that).
 - Does not write the literature review text (use `/write-paper` for that).
 - Does not fabricate any part of a citation.

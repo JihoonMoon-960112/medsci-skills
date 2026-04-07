@@ -4,8 +4,7 @@ description: >
   Academic paper presentation preparation. Analyzes a research paper, finds supporting references,
   drafts audience-adapted speaker scripts, injects speaker notes into slides, and prepares Q&A.
   Supports journal clubs, grand rounds, seminar presentations, and coursework presentations.
-  Triggers: present paper, paper presentation, journal club, seminar presentation, grand rounds,
-  academic presentation, presentation prep
+triggers: present paper, paper presentation, journal club, seminar presentation, grand rounds, academic presentation, presentation prep
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---

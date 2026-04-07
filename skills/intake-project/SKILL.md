@@ -3,7 +3,7 @@ name: intake-project
 description: >
   Intake and normalize a new radiology research project. Classifies project type, summarizes current state,
   identifies missing inputs, recommends next steps, and scaffolds lightweight project memory files.
-  Triggers: new project, intake project, project intake, 프로젝트 시작, 프로젝트 정리, 새 연구 정리
+triggers: new project, intake project, project intake, classify project, organize project, what is this project
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---

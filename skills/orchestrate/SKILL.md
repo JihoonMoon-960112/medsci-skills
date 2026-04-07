@@ -4,8 +4,7 @@ description: >
   General-purpose research orchestrator. Routes ambiguous or multi-step requests to the right skill(s)
   from the medical-research-skills bundle. Use when the user describes a research goal without naming
   a specific skill, or when a task spans multiple skills.
-  Triggers: orchestrate, research help, what should I do next, where do I start, help me with my paper,
-  run the pipeline, which skill, 연구 도와줘, 다음 단계
+triggers: orchestrate, research help, what should I do next, where do I start, help me with my paper, run the pipeline, which skill
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---
