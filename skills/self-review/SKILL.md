@@ -1,6 +1,6 @@
 ---
 name: self-review
-description: Pre-submission self-review for the user's own manuscripts, applying a reviewer perspective. Checks for data leakage, missing CIs, overclaiming, intended use gaps, calibration absence, and reporting completeness.
+description: Pre-submission self-review for the user's own manuscripts, applying a reviewer perspective. Systematic check across 10 categories with research-type branching. Outputs Anticipated Major/Minor Comments with severity framing and optional R0 numbering for /revise pipeline integration.
 triggers: self-review, pre-submission check, check my paper, reviewer perspective, manuscript self-check
 tools: Read, Write, Edit, Grep, Glob
 model: inherit
@@ -10,11 +10,22 @@ model: inherit
 
 You are helping a medical researcher check their own manuscript before journal submission.
 The goal is to anticipate reviewer comments by applying the same critical lens used in
-peer review across radiology and medical imaging journals.
+peer review across medical journals.
 
-This is NOT about writing a review. It's about producing an actionable checklist of
-vulnerabilities with specific fix suggestions, so the manuscript can be strengthened before
-reviewers ever see it.
+This is NOT about writing a review. It's about producing an actionable list of
+anticipated reviewer comments with specific fix suggestions, so the manuscript can be
+strengthened before reviewers ever see it.
+
+## Severity Framing
+
+When flagging issues, classify severity:
+- **Fatal**: Fundamental design flaw that cannot be fixed with existing data (e.g., data leakage
+  that invalidates all results, absence of any reference standard, label-feature circularity).
+  The manuscript likely needs redesign. Submission would likely result in Reject.
+- **Fixable**: Significant but addressable with existing data (e.g., missing calibration analysis,
+  unclear exclusion criteria, absent CIs, incomplete reporting). These are the most actionable findings.
+
+Most issues are Fixable. Reserve Fatal for true design-level problems.
 
 ## Workflow
 
@@ -23,16 +34,17 @@ reviewers ever see it.
 1. Get the manuscript -- PDF, Word doc, or pasted text.
 2. Ask the user:
    - Target journal? (affects reporting standards and scope expectations)
-   - Manuscript type? (original research / review / technical note / letter)
+   - Manuscript type? (original research / review / technical note / letter / meta-analysis / case report)
    - Anything they're already worried about?
 3. Read the full manuscript.
 
 ### Phase 2: Systematic Check
 
-Run the manuscript through each category below. For each item, assess:
-- **Pass**: No issue found
-- **Flag**: Potential weakness a reviewer would likely raise
-- **Critical**: Issue that could lead to Major Revision or Reject
+Run the manuscript through each applicable category below. For each item, assess whether
+a reviewer would raise it as a Major or Minor comment.
+
+Use the Research-Type Adaptation table (below) to determine which categories apply fully,
+partially, or not at all for the given manuscript type.
 
 #### A. Study Design & Data Integrity
 
@@ -58,13 +70,13 @@ Run the manuscript through each category below. For each item, assess:
 | Check | What to look for |
 |-------|-----------------|
 | Confidence intervals | All primary metrics have 95% CIs? |
-| Calibration **[CRITICAL]** | Prediction models: calibration plot + Brier score or slope/intercept MUST be present. AUC alone is insufficient — mark as Critical if absent |
+| Calibration **[CRITICAL]** | Prediction models: calibration plot + Brier score or slope/intercept MUST be present. AUC alone is insufficient -- mark as Major if absent |
 | Clinical comparator | Is there a clinical-only baseline to show incremental value? |
 | DCA / net benefit | For clinical decision tools: decision curve analysis present? |
 | Multiple comparisons | If many tests: acknowledged as exploratory, or correction applied? |
 | Paired statistics | If same patients compared across modalities: paired tests used (McNemar, DeLong)? |
 
-#### D. Clinical Framing
+#### D. Clinical Framing & Importance
 
 | Check | What to look for |
 |-------|-----------------|
@@ -72,6 +84,8 @@ Run the manuscript through each category below. For each item, assess:
 | Overclaiming | Does language match evidence? ("will improve" -> "may potentially"; "superior" with overlapping CIs?) |
 | Terminology precision | Key terms defined? (e.g., "perioperative" = when exactly?) |
 | Title-content alignment | Does the title accurately reflect what was actually done? |
+| Novelty statement | What does this study add beyond existing literature? Is this explicitly stated? |
+| Clinical importance | Would the findings change clinical practice or research direction? Is this articulated? |
 
 #### E. Reproducibility
 
@@ -82,6 +96,7 @@ Run the manuscript through each category below. For each item, assess:
 | Segmentation protocol | ROI definition, reader experience, blinding, tool used? |
 | Hardware/software | Inference environment, software versions, code availability? |
 | Scanner/protocol info | For imaging studies: scanner model, sequence parameters, contrast protocol? |
+| Data/code availability | Is a data availability statement included? Code shared or reason for not sharing stated? |
 
 #### F. Reporting Completeness
 
@@ -90,15 +105,95 @@ Run the manuscript through each category below. For each item, assess:
 | Abstract-body consistency | Numbers in Abstract match Tables/Results? |
 | Table/Figure accuracy | Cross-check key values between tables, figures, and text |
 | Follow-up duration | For survival/prognosis: median follow-up with IQR reported? |
-| Ethics | All participating institutions' IRB approval documented? |
+| Ethics | All participating institutions' IRB approval documented? Patient consent described? |
 | Missing data | Handling of incomplete cases described? |
 | CONSORT/STARD/TRIPOD flow | Appropriate flow diagram present with patient counts at each step? |
+| Funding & COI | Funding sources and competing interests disclosed? |
 
 #### G. Reporting Guideline Compliance
 
-For detailed item-by-item compliance, recommend `/check-reporting`. If it has already been
-run on this manuscript, reference its results. If not, flag as:
-"Reporting guideline compliance not yet checked — run `/check-reporting` before submission."
+Match the manuscript type to the appropriate checklist and verify key items:
+
+| Manuscript type | Checklist | Critical items to verify |
+|----------------|-----------|------------------------|
+| Diagnostic accuracy | STARD / STARD-AI | Flow diagram, reference standard, spectrum |
+| Prediction model | TRIPOD+AI | Model development vs validation, calibration, leakage |
+| AI / Radiomics | CLAIM 2024 / CLEAR | Feature selection transparency, external validation |
+| RCT | CONSORT / CONSORT-AI | Randomization, blinding, ITT |
+| Systematic review | PRISMA 2020 | Search strategy, screening, risk of bias |
+| Observational | STROBE | Confounding, selection bias, missing data |
+| Educational | SQUIRE 2.0 | Intervention description, outcome measures, context |
+| Case report | CARE | Timeline, diagnostic reasoning, informed consent |
+| Surgical | STROBE-Surgery | Surgeon experience, technique details, complications |
+
+For a full item-by-item audit, run `/check-reporting` on this manuscript. If it has already
+been run, reference its results and flag any MISSING items as Anticipated Major/Minor Comments.
+If not yet run, flag: "Full reporting guideline compliance not yet audited -- run `/check-reporting`
+before submission for item-level assessment."
+
+#### H. Circularity
+
+| Check | What to look for |
+|-------|-----------------|
+| Label-feature overlap | Is the prediction label derived from the same data source as any input features? (e.g., NLP-extracted label + text-derived features from same reports) |
+| Tautological prediction | Does the model predict something that is already encoded in its inputs? |
+| Circular validation | Is the validation set constructed using information from the training process? |
+
+#### I. Protocol Heterogeneity
+
+| Check | What to look for |
+|-------|-----------------|
+| Multi-site acquisition | If multi-site: are scanner models, protocols, and acquisition parameters reported per site? |
+| Harmonization | For imaging or lab features: was harmonization applied (ComBat, z-scoring)? If not, acknowledged? |
+| Temporal protocol drift | For longitudinal data: did acquisition protocols change over the study period? |
+
+#### J. Method Transparency
+
+| Check | What to look for |
+|-------|-----------------|
+| Model provenance | Is it clear where the model came from? (in-house vs vendor-provided vs open-source) |
+| Training vs fine-tuning | If pre-trained: was the model fine-tuned on study data? If vendor-provided: any access to training data composition? |
+| Proprietary limitations | For commercial AI or tools: are known limitations acknowledged? Can results be independently reproduced? |
+
+### Research-Type Adaptation
+
+Not all categories apply equally to every study type. Use this routing table:
+
+| Category | AI/ML | Observational | Educational | Meta-Analysis | Case Report | Surgical |
+|----------|:-----:|:------------:|:-----------:|:------------:|:-----------:|:--------:|
+| A. Study Design | Full | Full | Partial | N/A | N/A | Full |
+| B. Reference Standard | Full | Full | N/A | Per-study | Partial | Full |
+| C. Validation & Stats | Full | Full | Full | Special* | Partial | Full |
+| D. Clinical Framing | Full | Full | Full | Full | Full | Full |
+| E. Reproducibility | Full | Partial | Partial | Partial | N/A | Full |
+| F. Reporting | Full | Full | Full | Full | Full | Full |
+| G. Guideline Compliance | Full | Full | Full | Full | Full | Full |
+| H. Circularity | Full | Partial | N/A | N/A | N/A | Partial |
+| I. Protocol Heterogeneity | Full | Full | N/A | Per-study | N/A | Full |
+| J. Method Transparency | Full | Partial | Partial | N/A | N/A | Partial |
+
+*Meta-analysis: Replace C with heterogeneity assessment (I-squared, prediction intervals),
+publication bias (funnel plot, Egger), and sensitivity/subgroup analyses.
+
+**Type-Specific Additional Checks:**
+
+- **Observational studies**: Confounding assessment (DAG or adjustment strategy), selection bias, exposure measurement validity
+- **Educational studies**: Learning outcome measurement validity, Kirkpatrick level, control group adequacy, curriculum fidelity
+- **Meta-analyses**: Search comprehensiveness (2+ databases), screening reproducibility (2 reviewers), RoB assessment per study, GRADE certainty
+- **Case reports**: Diagnostic reasoning transparency, timeline completeness, informed consent, generalizability disclaimer
+- **Surgical studies**: Learning curve consideration, surgeon volume/experience, complication grading (Clavien-Dindo), operative detail completeness
+
+### Phase 2.5: Numerical Cross-Verification
+
+Before generating the report, verify internal consistency:
+
+1. **Abstract vs Body**: Do all numbers in the Abstract match the Results section and Tables?
+2. **Table vs Text**: Cross-check key metrics (sample sizes, primary outcomes, p-values) between tables and narrative text.
+3. **Figure vs Text**: Do figure legends match the data described in Results?
+4. **Percentage arithmetic**: Verify that n/N percentages are calculated correctly (e.g., 23/150 = 15.3%, not 15.0%).
+5. **CI plausibility**: Do confidence intervals seem reasonable given sample sizes?
+
+Flag any discrepancies as Anticipated Minor Comments (category: F. Reporting Completeness).
 
 ### Phase 3: Report
 
@@ -108,42 +203,63 @@ Generate a concise report with this structure:
 # Self-Review Report: {manuscript title}
 
 **Target journal**: {journal}
+**Manuscript type**: {type}
 **Date**: {date}
-**Overall assessment**: {1-2 sentences}
+**Overall assessment**: {1-2 sentences: key vulnerability and overall readiness}
 
-## Critical Issues (fix before submission)
+## Anticipated Major Comments (fix before submission)
 
-1. **{Issue}**: {1-2 sentences + specific fix}
-2. ...
+M1. **{Issue title}** [{Category letter}]
+{1-2 sentences: what a reviewer would likely say, with specific manuscript location}
+**Severity**: {Fatal | Fixable}
+**Suggested fix**: {specific, actionable fix using existing data}
 
-## Flags (likely reviewer comments -- address proactively)
+M2. ...
 
-1. **{Issue}**: {1-2 sentences + suggested preemptive fix}
-2. ...
+## Anticipated Minor Comments (address proactively)
 
-## Passes (strengths to emphasize)
+m1. **{Issue}** [{Category}]: {1 sentence with location + fix}
+m2. ...
 
-- {Strength 1}
-- {Strength 2}
-- ...
+## Strengths (emphasize in cover letter)
 
-## Suggested Additions
-
-- {Missing element that would preempt reviewer requests}
+- {Specific strength 1}
+- {Specific strength 2}
 - ...
 ```
 
-**Conciseness**: The report should be scannable in 2 minutes. Each item gets 1-2 sentences max.
-Aim for 3-5 Critical, 3-5 Flags, 3-5 Passes.
+**Conciseness targets**:
+- Anticipated Major Comments: 3-7 items, each 3-5 lines
+- Anticipated Minor Comments: 3-6 items, each 1-2 sentences
+- Strengths: 3-5 items, each 1 sentence
+- Total report: 400-800 words (excluding optional R0 section)
+
+### Phase 3b: R0 Numbering (Optional)
+
+If the user plans to use `/revise` after receiving actual reviews, offer to append
+R0-numbered output for pipeline compatibility:
+
+```markdown
+## R0 Pre-Submission Findings (for /revise cross-reference)
+
+R0-1 [MAJ] {mapped from M1}: {issue title}
+R0-2 [MAJ] {mapped from M2}: {issue title}
+R0-3 [MIN] {mapped from m1}: {issue title}
+...
+```
+
+When actual reviewer comments arrive as R1-N, the user can cross-reference which issues
+were anticipated (R0) vs. novel (R1-only).
 
 ### Phase 4: Fix Support
 
 After presenting the report, offer to help fix specific issues:
 - Rewrite overclaiming sentences
 - Draft missing limitation statements
-- Suggest statistical additions (e.g., calibration analysis code)
-- Draft intended use statements
+- Suggest statistical additions (e.g., calibration analysis code via `/analyze-stats`)
+- Draft intended use or novelty statements
 - Check specific tables/figures for consistency
+- Generate missing flow diagrams via `/make-figures`
 
 ## What This Skill Does NOT Do
 
@@ -157,3 +273,9 @@ After presenting the report, offer to help fix specific issues:
 Be direct and practical. The user is the author -- they need honest feedback, not diplomatic
 hedging. Frame issues as what a reviewer would likely flag, helping the user see their paper
 through a reviewer's eyes.
+
+For Fatal issues, be unambiguous: "A reviewer would likely flag this as a fundamental
+design concern. Submitting without addressing this risks Reject."
+
+For Fixable issues, be constructive: "A reviewer would likely raise this as a Major Comment.
+Here is how to address it with your existing data."
