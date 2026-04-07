@@ -24,13 +24,14 @@ Literature Review -> Study Design -> Analysis -> Figures -> Writing -> Reporting
                               └─────────────────────────────────────────────┘
 ```
 
-### Available Now (Phase 1)
+### Available Now
 
 | Skill | What It Does |
 |-------|-------------|
-| **search-lit** | PubMed + Semantic Scholar + bioRxiv search with anti-hallucination citation verification. Every reference verified via API before inclusion. |
-| **check-reporting** | Manuscript compliance audit against 9 reporting guidelines (STROBE, CONSORT, STARD, TRIPOD+AI, PRISMA, CARE, SPIRIT, ARRIVE, CLAIM). Item-by-item PRESENT/PARTIAL/MISSING assessment. |
-| **analyze-stats** | Statistical analysis code generation (Python/R) for diagnostic accuracy, inter-rater agreement, meta-analysis, survival analysis, and demographics tables. |
+| **search-lit** | PubMed + Semantic Scholar + bioRxiv search with anti-hallucination citation verification. Full-text OA retrieval pipeline (Unpaywall, PMC, OpenAlex). |
+| **check-reporting** | Manuscript compliance audit against 15 reporting guidelines and risk of bias tools (STROBE, STARD, TRIPOD+AI, PRISMA, PRISMA-DTA, ARRIVE, QUADAS-2, RoB 2, ROBINS-I, PROBAST, NOS, and more). |
+| **analyze-stats** | Statistical analysis code generation (Python/R) for diagnostic accuracy, DTA meta-analysis (bivariate/HSROC), inter-rater agreement, survival analysis, and demographics tables. |
+| **meta-analysis** | Full systematic review and meta-analysis pipeline (8 phases). DTA (bivariate/HSROC) and intervention meta-analysis. Protocol to submission-ready manuscript with PRISMA-DTA compliance. |
 | **make-figures** | Publication-ready figures: ROC curves, forest plots, PRISMA/CONSORT/STARD flow diagrams, Kaplan-Meier curves, Bland-Altman plots, confusion matrices. |
 | **design-study** | Study design review: identifies analysis unit, cohort logic, data leakage risks, comparator design, validation strategy, and reporting guideline fit. |
 | **intake-project** | Classifies new research projects, summarizes current state, identifies missing inputs, and recommends next steps. |
@@ -45,7 +46,6 @@ Literature Review -> Study Design -> Analysis -> Figures -> Writing -> Reporting
 | **write-paper** | Full IMRAD manuscript pipeline (8 phases) |
 | **self-review** | Pre-submission self-review from reviewer perspective |
 | **revise** | Response to reviewers with tracked changes |
-| **meta-analysis** | DTA (bivariate/HSROC) and intervention meta-analysis pipeline |
 | **manage-project** | Research project scaffolding and progress tracking |
 
 ## Installation
@@ -71,8 +71,8 @@ After copying, restart Claude Code. Skills are automatically discovered from `~/
 ### Anti-Hallucination Citations
 Every reference produced by `search-lit` is verified against PubMed, Semantic Scholar, or CrossRef APIs. No citation is ever generated from memory alone.
 
-### 9 Reporting Guidelines Built-in
-`check-reporting` includes STROBE, STARD, TRIPOD+AI, PRISMA, and ARRIVE checklists. CONSORT, CARE, SPIRIT, and CLAIM are supported via knowledge-based assessment (checklists not bundled due to license restrictions).
+### 15 Reporting Guidelines & RoB Tools Built-in
+`check-reporting` includes STROBE, STARD, TRIPOD+AI, PRISMA, PRISMA-DTA, ARRIVE, QUADAS-2, RoB 2, ROBINS-I, PROBAST, and NOS checklists. CONSORT, CARE, SPIRIT, and CLAIM are supported via knowledge-based assessment (checklists not bundled due to license restrictions).
 
 ### Publication-Ready Output
 `analyze-stats` generates reproducible Python/R code. `make-figures` produces journal-specification figures (300 DPI, colorblind-safe palettes, proper dimensions).
@@ -84,7 +84,7 @@ Skills can call each other. For example, `check-reporting` can invoke `make-figu
 
 - [Claude Code](https://claude.ai/code) CLI or IDE extension
 - Python 3.9+ (for statistical analysis and figure generation)
-- R 4.0+ (optional, for meta-analysis templates)
+- R 4.0+ with `meta` (>=7.0), `metafor` (>=4.0), `mada` (>=0.5.11) packages (for meta-analysis)
 
 ## Disclaimer
 

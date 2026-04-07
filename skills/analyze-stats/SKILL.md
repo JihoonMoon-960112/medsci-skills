@@ -51,6 +51,7 @@ Present the plan and **wait for user approval** before executing.
 | Diagnostic Accuracy | Sensitivity/specificity/AUC | sklearn, scipy | pROC | ROC curve, performance table |
 | Inter-rater Agreement | Multiple raters rating same items | krippendorff, pingouin | irr, psych | ICC/Kappa table |
 | Meta-analysis | Pooling effect sizes across studies | -- | meta, metafor | Forest + funnel plots |
+| DTA Meta-analysis | Pooling diagnostic accuracy across studies | -- | meta, metafor, mada | SROC + paired forest plots |
 | Survey/Likert | Ordinal rating scales | pingouin, scipy | psych | Descriptive + reliability |
 | Survival | Time-to-event outcomes | lifelines | survival | KM curves, Cox table |
 | Group Comparison | Comparing 2+ groups | scipy, pingouin | -- | Test results + effect sizes |
@@ -203,6 +204,27 @@ These rules apply to ALL analyses without exception:
 - Funnel plot + Egger's test for publication bias (note: underpowered k<10)
 - Sensitivity analysis: leave-one-out (`metainf()`)
 - Subgroup: `update(res, subgroup = variable)`
+
+### DTA Meta-Analysis
+
+- Template: `references/templates/dta_meta_analysis.R`
+- Prefer R (`mada`, `meta`, `metafor` packages) for DTA meta-analysis
+- **Bivariate model** (Reitsma): `mada::reitsma()` — recommended over separate pooling of Se/Sp
+  - Accounts for correlation between sensitivity and specificity
+  - Produces SROC curve with confidence + prediction regions
+- **Key outputs**: Pooled Se/Sp (95% CI), positive/negative LR, DOR, SROC AUC
+- **Threshold effect**: Spearman correlation between logit(Se) and logit(FPR)
+  - If significant: interpret single pooled Se/Sp with caution, emphasize SROC curve
+- **Forest plots**: Paired (sensitivity + specificity side by side)
+- **Publication bias**: Deeks' funnel plot asymmetry test (NOT standard funnel plot)
+  - Standard funnel plots are inappropriate for DTA studies
+  - Note: underpowered for k < 10
+- **Dual approach** (comparative + single-arm):
+  - Primary: `metabin()` for comparative studies (OR/RR)
+  - Secondary: `metaprop()` with `sm = "PLOGIT"` for single-arm pooled proportion
+  - Use `method = "Inverse"`, `method.tau = "DL"`, `method.random.ci = "HK"`
+- **Small studies (k < 10)**: bivariate model may not converge; consider narrative synthesis
+- **Alternative**: If `mada` unavailable, use `metafor::rma.mv()` with bivariate structure
 
 ### Survey/Likert
 

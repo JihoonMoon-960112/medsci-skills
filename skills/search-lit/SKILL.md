@@ -213,7 +213,81 @@ If a Zotero MCP server is available, integrate search results with the user's li
 
 > Requires Zotero Desktop running with MCP server. Skip this phase if unavailable.
 
-### Phase 5: Gap Analysis
+### Phase 5: Full-Text Retrieval
+
+After identifying relevant papers, retrieve full-text PDFs for detailed review.
+This is especially important for meta-analyses where data extraction requires full text.
+
+#### Phase 5a: Open Access Auto-Retrieval
+
+Try sources in order of reliability:
+
+1. **Unpaywall API** (highest quality OA links):
+   ```python
+   import os, requests
+   email = os.environ.get("UNPAYWALL_EMAIL", "user@example.com")
+   url = f"https://api.unpaywall.org/v2/{doi}?email={email}"
+   r = requests.get(url).json()
+   if r.get("best_oa_location", {}).get("url_for_pdf"):
+       pdf_url = r["best_oa_location"]["url_for_pdf"]
+   ```
+
+2. **PubMed Central (PMC)**:
+   - Convert PMID to PMCID via NCBI ID Converter
+   - Download from PMC OA service: `https://www.ncbi.nlm.nih.gov/pmc/articles/PMC{id}/pdf/`
+
+3. **OpenAlex API** (additional OA discovery):
+   ```python
+   url = f"https://api.openalex.org/works/https://doi.org/{doi}"
+   # Requires polite pool: add email in User-Agent header or mailto= param
+   r = requests.get(url, headers={"User-Agent": f"MyApp/1.0 (mailto:{email})"}).json()
+   oa_url = r.get("open_access", {}).get("oa_url")
+   ```
+
+4. **CrossRef landing page**: Follow `https://api.crossref.org/works/{doi}` → publisher link
+   → scrape `<meta name="citation_pdf_url">` tag
+
+#### Phase 5b: Alternative Sources
+
+Some researchers use alternative access methods for paywalled content.
+**Users are responsible for ensuring compliance with their institutional access policies.**
+
+If an environment variable (e.g., `SCIHUB_BASE`) is set, the skill may use it as an
+alternative PDF source. No specific URLs are provided here — users configure this themselves.
+
+Other options:
+- **Institutional proxy/VPN**: Access publisher sites through institutional EZproxy or VPN
+- **Interlibrary loan (ILL)**: Request through library services for papers not otherwise available
+- **Author contact**: Email corresponding authors for preprints
+
+#### PDF Validation
+
+Always validate downloaded files before use:
+
+```python
+def is_valid_pdf(filepath):
+    """Check that a downloaded file is actually a PDF, not an HTML redirect."""
+    import os
+    if os.path.getsize(filepath) < 10240:  # < 10KB is likely a stub/redirect
+        return False
+    with open(filepath, 'rb') as f:
+        header = f.read(5)
+    return header == b'%PDF-'
+```
+
+Additional checks:
+- Verify HTTP `Content-Type: application/pdf` header before saving
+- Files under 10KB are almost always HTML login/redirect pages, not real PDFs
+- Some publishers return CAPTCHA pages — these fail the `%PDF-` check
+
+#### Rate Limiting
+
+- Unpaywall: Polite pool (no hard limit with email parameter)
+- OpenAlex: Include email in User-Agent for polite pool access
+- NCBI/PMC: 3 requests/sec without API key, 10/sec with `NCBI_API_KEY`
+- General: 2-second minimum interval between requests to any single host
+
+### Phase 6: Gap Analysis
 
 When called during manuscript writing (especially by `/write-paper` Phase 7):
 
@@ -296,7 +370,7 @@ Embase has no public API. Use Chrome browser automation (MCP) to search and expo
 
 ## What This Skill Does NOT Do
 
-- Does not read full-text PDFs from paywalled journals (only metadata and abstracts).
+- Does not download from paywalled journals without user-provided credentials or institutional access.
 - Does not assess the quality of evidence (use `/analyze-stats` or `/peer-review` for that).
 - Does not write the literature review text (use `/write-paper` for that).
 - Does not fabricate any part of a citation.

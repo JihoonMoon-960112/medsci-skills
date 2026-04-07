@@ -109,10 +109,11 @@ run_meta <- function(df, effect_type, subgroup_col = NA) {
       studlab = study_label,
       data    = df,
       sm      = effect_type,
-      method  = "MH",         # Mantel-Haenszel for primary pooling
+      method  = "Inverse",    # Inverse-variance (avoids method.tau conflict with MH)
       method.tau = "DL",      # DerSimonian-Laird for τ²
-      random  = TRUE,
-      fixed   = FALSE,
+      method.random.ci = "HK", # Hartung-Knapp adjustment
+      common  = FALSE,        # replaces deprecated 'fixed'
+      random  = TRUE,         # replaces deprecated 'comb.random'
       prediction = TRUE,      # Show prediction interval
       title   = paste("Meta-analysis:", effect_type)
     )

@@ -1,7 +1,7 @@
 ---
 name: check-reporting
-description: Check manuscript compliance with medical research reporting guidelines. Supports STROBE, CONSORT, STARD, TRIPOD+AI, ARRIVE, PRISMA, CARE, SPIRIT, CLAIM, and their AI extensions. Generates item-by-item assessment with PRESENT/MISSING/PARTIAL status.
-triggers: checklist, reporting guideline, 보고 가이드라인, STROBE, CONSORT, STARD, TRIPOD, PRISMA, ARRIVE, CARE, CLAIM, SPIRIT, compliance check
+description: Check manuscript compliance with medical research reporting guidelines. Supports 15 guidelines including STROBE, CONSORT, STARD, TRIPOD+AI, ARRIVE, PRISMA, PRISMA-DTA, CARE, SPIRIT, CLAIM, and risk of bias tools (QUADAS-2, RoB 2, ROBINS-I, PROBAST, NOS). Generates item-by-item assessment with PRESENT/MISSING/PARTIAL status.
+triggers: checklist, reporting guideline, 보고 가이드라인, STROBE, CONSORT, STARD, TRIPOD, PRISMA, PRISMA-DTA, ARRIVE, CARE, CLAIM, SPIRIT, QUADAS, RoB, ROBINS, PROBAST, NOS, risk of bias, compliance check
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---
@@ -26,6 +26,12 @@ compliance report suitable for journal submission.
   - `TRIPOD_AI.md` -- prediction models with AI/ML (CC BY 4.0)
   - `PRISMA_2020.md` -- systematic reviews (CC BY)
   - `ARRIVE_2.md` -- animal studies (CC0)
+  - `PRISMA_DTA.md` -- DTA systematic reviews (CC BY, McInnes et al. JAMA 2018)
+  - `QUADAS2.md` -- diagnostic accuracy risk of bias (CC BY, Whiting et al. Ann Intern Med 2011)
+  - `RoB2.md` -- RCT risk of bias (CC BY, Sterne et al. BMJ 2019)
+  - `ROBINS_I.md` -- non-randomised studies risk of bias (CC BY, Sterne et al. BMJ 2016)
+  - `PROBAST.md` -- prediction model risk of bias (CC BY, Wolff et al. Ann Intern Med 2019)
+  - `NOS.md` -- observational study quality (public domain, Ottawa Hospital)
 - **External checklists (not bundled due to license restrictions)**:
   Users should download these from official sources when needed:
   - CONSORT 2010 -- https://www.consort-statement.org
@@ -52,6 +58,12 @@ user specification.
 | Diagnostic accuracy study | STARD 2015 | STARD-AI |
 | Prediction model (development/validation) | TRIPOD | TRIPOD+AI |
 | Systematic review / meta-analysis | PRISMA 2020 | -- |
+| DTA systematic review / meta-analysis | PRISMA-DTA | -- |
+| Risk of bias (DTA studies) | QUADAS-2 | -- |
+| Risk of bias (RCTs) | RoB 2 | -- |
+| Risk of bias (non-randomised studies) | ROBINS-I | -- |
+| Risk of bias (prediction models) | PROBAST | PROBAST+AI |
+| Quality assessment (observational) | NOS | -- |
 | Case report | CARE | -- |
 | Study protocol | SPIRIT | SPIRIT-AI |
 | Animal study | ARRIVE 2.0 | -- |
