@@ -98,23 +98,93 @@ Save final outputs:
 
 Name files descriptively: `fig1_roc_curve.pdf`, `fig2_consort_flow.pdf`, etc.
 
+### Step 6: Design QC Checklist
+
+Before delivering the final figure, verify all items:
+
+- [ ] **Font**: Sans-serif (Arial/Helvetica), minimum 7pt, axis labels ≥ 9pt
+- [ ] **Color**: Wong/Okabe-Ito colorblind-safe palette used
+- [ ] **Colorblind test**: Would the figure work for deuteranopia? (no red-green only distinctions)
+- [ ] **Grayscale test**: Information preserved when printed in black & white
+- [ ] **Alignment**: All elements on a consistent grid; panels aligned
+- [ ] **Vector output**: PDF/SVG saved (not just PNG)
+- [ ] **Resolution**: ≥ 300 DPI for raster elements, ≥ 600 DPI for line art
+- [ ] **Journal specs**: Dimensions, font, and format match target journal requirements
+- [ ] **No chartjunk**: No 3D effects, unnecessary gridlines, gradient fills, or decorative elements
+- [ ] **Caption**: Drafted with key finding, abbreviations, statistical details, and sample size
+
 ---
 
-## Supported Figure Types
+## Tool Selection Guide
+
+Choose the right tool for each figure type. Using matplotlib for flow diagrams leads to
+hard-coded coordinates that break when text changes — use auto-layout tools instead.
+
+### Data Visualization → matplotlib/seaborn (this skill)
+
+Best for figures where data drives the layout. This skill handles these directly:
+
+| Type | Use Case | Key Library |
+|------|----------|-------------|
+| ROC Curve | Diagnostic accuracy | matplotlib, sklearn |
+| Forest Plot | Meta-analysis | matplotlib |
+| Calibration Plot | Prediction model | matplotlib |
+| KM Curve | Survival analysis | lifelines, matplotlib |
+| Bland-Altman | Agreement | matplotlib |
+| Confusion Matrix | Classification | seaborn |
+| Box/Violin Plot | Group comparison | seaborn |
+| Bar Chart | Categorical comparison | matplotlib |
+| Heatmap | Correlation/agreement | seaborn |
+
+### Flow Diagrams → Dedicated Tools (NOT matplotlib)
+
+Flow diagrams require auto-layout engines. Do NOT use matplotlib patches with manual coordinates
+— this causes the "absolute coordinate hell" problem where changing one box breaks all
+downstream positions.
+
+| Type | Recommended Tool | Why |
+|------|-----------------|-----|
+| PRISMA Flow | **PRISMA 2020 Shiny App** (estech.shinyapps.io/prisma_flowdiagram/) | Enter numbers → auto-generate compliant diagram |
+| CONSORT Diagram | **CONSORT2025 Shiny/R App** | Auto-generates CONSORT 2025 compliant flow |
+| STARD Diagram | **D2** (`d2 --layout elk`) → SVG → Figma polish | Auto-layout with customizable styling |
+| Pipeline Diagram | **D2** → SVG → optional Figma polish | Code-based + auto-layout + version control |
+
+**D2 workflow for flow diagrams:**
+```bash
+# Install: brew install d2
+# Render: d2 --layout elk --theme 0 diagram.d2 output.svg
+# Then open SVG in Figma for final polish (grid alignment, font swap, color adjustment)
+```
+
+### Graphical Abstracts → Design Tools
+
+| Type | Recommended Tool |
+|------|-----------------|
+| Graphical Abstract | Figma + Servier Medical Art icons |
+| Medical Illustration | BioRender or Figma + Bioicons |
+
+### Hybrid Workflow (recommended for publication)
+
+```
+Data plots: matplotlib → PDF (this skill)
+Flow diagrams: D2 → SVG → Figma → PDF
+Final assembly: Figma or Inkscape (multi-panel)
+```
+
+---
+
+## Supported Figure Types (matplotlib/seaborn)
 
 | Type | Use Case | Key Library | Output |
 |------|----------|-------------|--------|
 | ROC Curve | Diagnostic accuracy | matplotlib, sklearn | Single/multi-model ROC with AUC |
 | Forest Plot | Meta-analysis | matplotlib | Effect sizes with CIs, diamond summary |
-| CONSORT Diagram | RCT flow | matplotlib (boxes+arrows) | Patient enrollment flow |
-| STARD Diagram | Diagnostic study flow | matplotlib | Index test flow |
-| PRISMA Flow | Systematic review | matplotlib | Search/screening/inclusion flow |
 | Calibration Plot | Prediction model | matplotlib | Observed vs predicted with Hosmer-Lemeshow |
 | KM Curve | Survival analysis | lifelines, matplotlib | With risk table, log-rank p |
 | Bland-Altman | Agreement | matplotlib | With mean diff, +/-1.96 SD limits |
 | Confusion Matrix | Classification | seaborn | Heatmap with percentages |
 | Box/Violin Plot | Group comparison | seaborn | With individual data points |
-| Pipeline Diagram | Methods figure | matplotlib (boxes+arrows) | Processing/workflow steps |
+| Pipeline Diagram | Methods figure | D2 (preferred) or matplotlib | Processing/workflow steps |
 | Bar Chart | Categorical comparison | matplotlib | With error bars (CI or SD) |
 | Heatmap | Correlation/agreement | seaborn | Color-coded matrix |
 
@@ -151,12 +221,24 @@ ax.legend(loc='lower right', frameon=False)
 
 ### Flow Diagrams (CONSORT / STARD / PRISMA)
 
+**Preferred approach: Use dedicated tools (see Tool Selection Guide above).**
+
+If matplotlib is required (e.g., for consistency with other panels), follow these rules:
 - Use rectangular boxes with rounded corners for stages.
 - Arrows connect stages vertically; side boxes for exclusions.
 - Consistent box widths, centered text.
 - Numbers must be included in each box (e.g., "Assessed for eligibility (n = 450)").
 - Follow the official template layout from each guideline.
-- Use matplotlib patches and FancyArrowPatch for clean rendering.
+- **Use relative positioning** — never hard-code absolute y-coordinates. Calculate each box
+  position from the previous box's bottom edge plus a consistent gap constant.
+- **Define gap constants** at the top of the script (e.g., `GAP_SMALL = 1.5`, `GAP_BRANCH = 2.2`).
+- **Avoid magic number padding** in arrow endpoints — use named constants.
+
+**D2 approach (recommended):**
+```bash
+d2 --layout elk --theme 0 flow.d2 output.svg
+# Then: open SVG in Figma → grid-snap → font swap → export PDF
+```
 
 ### Calibration Plot
 
