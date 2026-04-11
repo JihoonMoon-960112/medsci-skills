@@ -11,5 +11,8 @@ skills/check-reporting/references/checklists/SPIRIT.md
 *.XPT
 *.xpt
 
+# Python
+__pycache__/
+
 # macOS
 .DS_Store
