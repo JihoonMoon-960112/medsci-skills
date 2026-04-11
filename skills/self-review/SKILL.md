@@ -121,8 +121,10 @@ Match the manuscript type to the appropriate checklist and verify key items:
 | Prediction model (AI/ML) | TRIPOD+AI 2024 | Model development vs validation, calibration, leakage, fairness |
 | AI / Radiomics | CLAIM 2024 / CLEAR | Feature selection transparency, external validation |
 | RCT | CONSORT / CONSORT-AI | Randomization, blinding, ITT |
-| Systematic review | PRISMA 2020 | Search strategy, screening, risk of bias |
+| Systematic review (interventions) | PRISMA 2020 | Search strategy, screening, risk of bias |
+| Meta-analysis (observational) | MOOSE + PRISMA 2020 | Confounding assessment, heterogeneity, publication bias |
 | Observational | STROBE | Confounding, selection bias, missing data |
+| Reliability / agreement | GRRAS | ICC model/type, rater description, measurement protocol |
 | Educational | SQUIRE 2.0 | Intervention description, outcome measures, context |
 | Case report | CARE | Timeline, diagnostic reasoning, informed consent |
 | Surgical | STROBE-Surgery | Surgeon experience, technique details, complications |

@@ -1,6 +1,6 @@
 ---
 name: check-reporting
-description: Check manuscript compliance with medical research reporting guidelines. Supports 16 guidelines including STROBE, CONSORT, STARD, TRIPOD, TRIPOD+AI, ARRIVE, PRISMA, PRISMA-DTA, CARE, SPIRIT, CLAIM, and risk of bias tools (QUADAS-2, RoB 2, ROBINS-I, PROBAST, NOS). Generates item-by-item assessment with PRESENT/MISSING/PARTIAL status.
+description: Check manuscript compliance with medical research reporting guidelines. Supports 20 guidelines including STROBE, CONSORT, STARD, TRIPOD, TRIPOD+AI, ARRIVE, PRISMA, PRISMA-DTA, CARE, SPIRIT, CLAIM, SQUIRE 2.0, CLEAR, MOOSE, GRRAS, and risk of bias tools (QUADAS-2, RoB 2, ROBINS-I, PROBAST, NOS). Generates item-by-item assessment with PRESENT/MISSING/PARTIAL status.
 triggers: checklist, reporting guideline, STROBE, CONSORT, STARD, TRIPOD, PRISMA, PRISMA-DTA, ARRIVE, CARE, CLAIM, SPIRIT, QUADAS, RoB, ROBINS, PROBAST, NOS, risk of bias, compliance check
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
@@ -37,6 +37,10 @@ compliance report suitable for journal submission.
   - `CARE.md` -- case reports
   - `SPIRIT.md` -- study protocols
   - `CLAIM_2024.md` -- AI/ML in clinical imaging
+  - `SQUIRE_2.md` -- quality improvement in healthcare/education (CC BY, Ogrinc et al. BMJ Qual Saf 2016)
+  - `CLEAR.md` -- radiomics studies (CC BY 4.0, Kocak et al. Insights Imaging 2023)
+  - `MOOSE.md` -- meta-analysis of observational studies (Stroup et al. JAMA 2000)
+  - `GRRAS.md` -- reliability and agreement studies (Kottner et al. J Clin Epidemiol 2011)
 - If a local checklist file is not found for a requested guideline, the skill constructs checklist items from its knowledge of the guideline.
 
 ---
@@ -58,6 +62,7 @@ user specification.
 | Prediction model (development/validation) | TRIPOD | TRIPOD+AI |
 | Systematic review / meta-analysis | PRISMA 2020 | -- |
 | DTA systematic review / meta-analysis | PRISMA-DTA | -- |
+| Meta-analysis of observational studies | MOOSE | PRISMA 2020 (use both) |
 | Risk of bias (DTA studies) | QUADAS-2 | -- |
 | Risk of bias (RCTs) | RoB 2 | -- |
 | Risk of bias (non-randomised studies) | ROBINS-I | -- |
@@ -67,7 +72,9 @@ user specification.
 | Study protocol | SPIRIT | SPIRIT-AI |
 | Animal study | ARRIVE 2.0 | -- |
 | AI/ML study in clinical imaging | CLAIM 2024 | -- |
-| Educational study | SQUIRE 2.0 (if applicable) | -- |
+| Reliability / agreement study | GRRAS | -- |
+| Radiomics study | CLEAR | CLAIM 2024 (if deep learning component) |
+| Educational / QI study | SQUIRE 2.0 | -- |
 
 **Rules:**
 - If the study involves AI/ML, always apply the AI extension in addition to the base guideline.

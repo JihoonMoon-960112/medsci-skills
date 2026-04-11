@@ -143,7 +143,7 @@ search-lit -> fulltext-retrieval -> design-study ──> write-protocol -> manag
 | **orchestrate** | Single entry point for the full bundle. Classifies your request and routes to the right skill -- or chains multiple skills for multi-step workflows. **New:** Full Pipeline Mode runs `analyze-stats` → `make-figures` → `write-paper` → `check-reporting` → `self-review` end-to-end with automatic output discovery. |
 | **search-lit** | PubMed + Semantic Scholar + bioRxiv search with anti-hallucination citation verification. Token-efficient error handling -- CrossRef failures are silently batched, not repeated. |
 | **fulltext-retrieval** | Batch open-access PDF downloader. Unpaywall → PMC → OpenAlex → CrossRef pipeline. OA-only -- no paywall bypass. Input: DOI list or TSV. |
-| **check-reporting** | Manuscript compliance audit against 15 reporting guidelines and risk of bias tools (STROBE, STARD, TRIPOD+AI, PRISMA, PRISMA-DTA, ARRIVE, QUADAS-2, RoB 2, ROBINS-I, PROBAST, NOS, and more). Includes Results/Discussion section boundary check. |
+| **check-reporting** | Manuscript compliance audit against 20 reporting guidelines and risk of bias tools (STROBE, STARD, TRIPOD, TRIPOD+AI, PRISMA, PRISMA-DTA, MOOSE, ARRIVE, CONSORT, CARE, SPIRIT, CLAIM, SQUIRE 2.0, CLEAR, GRRAS, QUADAS-2, RoB 2, ROBINS-I, PROBAST, NOS). Includes Results/Discussion section boundary check. |
 | **analyze-stats** | Statistical analysis code generation (Python/R) for diagnostic accuracy, DTA meta-analysis (bivariate/HSROC), inter-rater agreement, survival analysis, and demographics tables. Calibration mandatory for prediction models. |
 | **meta-analysis** | Full systematic review and meta-analysis pipeline (8 phases). DTA (bivariate/HSROC) and intervention meta-analysis. Protocol to submission-ready manuscript with PRISMA-DTA compliance. |
 | **make-figures** | Publication-ready figures: ROC curves, forest plots, PRISMA/CONSORT/STARD flow diagrams, Kaplan-Meier curves, Bland-Altman plots, confusion matrices. |
@@ -199,8 +199,8 @@ After copying, restart Claude Code. Skills are automatically discovered from `~/
 ### Anti-Hallucination Citations
 Every reference produced by `search-lit` is verified against PubMed, Semantic Scholar, or CrossRef APIs. No citation is ever generated from memory alone. API errors are batched silently -- no token waste from repeated failure messages.
 
-### 15 Reporting Guidelines & RoB Tools Built-in
-`check-reporting` includes STROBE, STARD, TRIPOD+AI, PRISMA, PRISMA-DTA, ARRIVE, QUADAS-2, RoB 2, ROBINS-I, PROBAST, and NOS checklists. CONSORT, CARE, SPIRIT, and CLAIM are supported via knowledge-based assessment (checklists not bundled due to license restrictions). Now includes Results/Discussion section boundary checks.
+### 20 Reporting Guidelines & RoB Tools Built-in
+`check-reporting` includes bundled checklists for STROBE, STARD, TRIPOD, TRIPOD+AI, PRISMA, PRISMA-DTA, MOOSE, ARRIVE, CONSORT, CARE, SPIRIT, CLAIM, SQUIRE 2.0, CLEAR, GRRAS, QUADAS-2, RoB 2, ROBINS-I, PROBAST, and NOS. Now includes Results/Discussion section boundary checks.
 
 ### Publication-Ready Output
 `analyze-stats` generates reproducible Python/R code with mandatory calibration for prediction models. `make-figures` produces journal-specification figures (300 DPI, colorblind-safe palettes, proper dimensions) with a tool selection guide (D2 for flow diagrams, matplotlib for data plots).
