@@ -15,6 +15,7 @@ Attribution for bundled reporting guideline checklists.
 | ROBINS_I.md | ROBINS-I | Sterne JAC et al. BMJ 2016 | CC BY |
 | PROBAST.md | PROBAST | Wolff RF et al. Ann Intern Med 2019 | CC BY |
 | NOS.md | Newcastle-Ottawa Scale | Wells GA et al. Ottawa Hospital Research Institute | Public Domain |
+| MI_CLEAR_LLM.md | MI-CLEAR-LLM 2025 | Park SH et al. Korean J Radiol 2024;25(10):865-868; 2025 update KJR 2025;26(12):1123-1132 | CC BY-NC 4.0 |
 
 These files are educational summaries of published assessment tools. The original
 checklist documents should be cited in any manuscript that uses them. All files are

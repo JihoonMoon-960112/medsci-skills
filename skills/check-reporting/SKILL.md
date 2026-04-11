@@ -1,7 +1,7 @@
 ---
 name: check-reporting
-description: Check manuscript compliance with medical research reporting guidelines. Supports 20 guidelines including STROBE, CONSORT, STARD, TRIPOD, TRIPOD+AI, ARRIVE, PRISMA, PRISMA-DTA, CARE, SPIRIT, CLAIM, SQUIRE 2.0, CLEAR, MOOSE, GRRAS, and risk of bias tools (QUADAS-2, RoB 2, ROBINS-I, PROBAST, NOS). Generates item-by-item assessment with PRESENT/MISSING/PARTIAL status.
-triggers: checklist, reporting guideline, STROBE, CONSORT, STARD, TRIPOD, PRISMA, PRISMA-DTA, ARRIVE, CARE, CLAIM, SPIRIT, QUADAS, RoB, ROBINS, PROBAST, NOS, risk of bias, compliance check
+description: Check manuscript compliance with medical research reporting guidelines. Supports 21 guidelines including STROBE, CONSORT, STARD, TRIPOD, TRIPOD+AI, ARRIVE, PRISMA, PRISMA-DTA, CARE, SPIRIT, CLAIM, MI-CLEAR-LLM, SQUIRE 2.0, CLEAR, MOOSE, GRRAS, and risk of bias tools (QUADAS-2, RoB 2, ROBINS-I, PROBAST, NOS). Generates item-by-item assessment with PRESENT/MISSING/PARTIAL status.
+triggers: checklist, reporting guideline, STROBE, CONSORT, STARD, TRIPOD, PRISMA, PRISMA-DTA, ARRIVE, CARE, CLAIM, MI-CLEAR-LLM, SPIRIT, QUADAS, RoB, ROBINS, PROBAST, NOS, risk of bias, compliance check, LLM accuracy
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---
@@ -37,6 +37,7 @@ compliance report suitable for journal submission.
   - `CARE.md` -- case reports
   - `SPIRIT.md` -- study protocols
   - `CLAIM_2024.md` -- AI/ML in clinical imaging
+  - `MI_CLEAR_LLM.md` -- LLM accuracy studies in healthcare (CC BY-NC 4.0, Park et al. KJR 2024; 2025 update)
   - `SQUIRE_2.md` -- quality improvement in healthcare/education (CC BY, Ogrinc et al. BMJ Qual Saf 2016)
   - `CLEAR.md` -- radiomics studies (CC BY 4.0, Kocak et al. Insights Imaging 2023)
   - `MOOSE.md` -- meta-analysis of observational studies (Stroup et al. JAMA 2000)
@@ -72,6 +73,7 @@ user specification.
 | Study protocol | SPIRIT | SPIRIT-AI |
 | Animal study | ARRIVE 2.0 | -- |
 | AI/ML study in clinical imaging | CLAIM 2024 | -- |
+| LLM accuracy evaluation in healthcare | MI-CLEAR-LLM | STARD-AI or CLAIM 2024 (use alongside) |
 | Reliability / agreement study | GRRAS | -- |
 | Radiomics study | CLEAR | CLAIM 2024 (if deep learning component) |
 | Educational / QI study | SQUIRE 2.0 | -- |
@@ -79,6 +81,7 @@ user specification.
 **Rules:**
 - If the study involves AI/ML, always apply the AI extension in addition to the base guideline.
   - **Exception — TRIPOD**: TRIPOD+AI 2024 (Collins et al., BMJ 2024) is a complete rewrite, not an addendum to TRIPOD 2015 (Moons et al., Ann Intern Med 2015). For non-AI prediction models, use TRIPOD 2015 only. For AI/ML prediction models, use TRIPOD+AI 2024 only. Do NOT apply both simultaneously.
+- **MI-CLEAR-LLM** is a supplementary checklist (6 items), not a standalone reporting guideline. Always pair it with the study's primary guideline (e.g., STARD for diagnostic accuracy, CLAIM for imaging AI). Apply MI-CLEAR-LLM whenever the study evaluates LLM accuracy as an outcome — do NOT apply it merely because the manuscript was written with LLM assistance.
 - If multiple guidelines apply (e.g., a diagnostic accuracy study that is also an AI study), check against all relevant guidelines and merge into one report.
 - If the user requests a specific guideline, use that one regardless of auto-detection.
 

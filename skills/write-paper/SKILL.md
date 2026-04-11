@@ -35,6 +35,9 @@ Gather essential information from the user before any writing begins.
 4. **Research question / hypothesis**
 5. **Available data**: what datasets, tables, analyses already exist
 
+**Optional flags:**
+- `--no-llm-disclosure`: Skip LLM writing assistance disclosure. Default is ON (disclosure included). See [LLM Disclosure](#llm-writing-disclosure) section below.
+
 **Actions:**
 1. Load the journal profile. If no profile exists, ask the user for: word limits, abstract format, citation style, figure/table limits, special requirements.
 2. Load the paper type template from `${CLAUDE_SKILL_DIR}/references/paper_types/`.
@@ -47,6 +50,8 @@ Gather essential information from the user before any writing begins.
    - Observational study: STROBE
    - Educational study: no standard checklist (use SQUIRE if applicable)
 4. Create or confirm the project scaffold directory.
+5. Check for `--no-llm-disclosure` flag. If absent, LLM disclosure is ON by default.
+   Record the flag state for use in Phase 3 (Methods), Phase 7 (deliverables), and Phase 8+ (cover letter).
 
 #### Case Report Mode
 
@@ -73,7 +78,7 @@ When paper type is "case report":
 
 5. Summarize the setup to the user and confirm before proceeding.
 
-**Output:** Setup summary with journal constraints, paper type, reporting guideline, and directory path.
+**Output:** Setup summary with journal constraints, paper type, reporting guideline, directory path, and LLM disclosure status (ON/OFF).
 
 ---
 
@@ -154,7 +159,8 @@ Write the Methods section first -- it is the most objective and anchors the rest
 3. Procedures / Intervention / AI Model description
 4. Outcome Measures (primary and secondary endpoints)
 5. Statistical Analysis (reference `${CLAUDE_SKILL_DIR}/references/section_templates/methods_statistical.md`)
-6. Ethics statement and AI disclosure
+6. Ethics statement
+7. AI/LLM disclosure (if `--no-llm-disclosure` was NOT set): insert the Methods disclosure paragraph from the [LLM Disclosure](#llm-writing-disclosure) section
 
 **Process:**
 1. **Writer pass**: Draft the full Methods section following the outline and paper type template.
@@ -301,10 +307,10 @@ Final quality pass before submission.
 3. Call `/search-lit` to verify all citations are real and correctly referenced.
 4. Call `/self-review` as a final pre-submission gate.
 5. Generate the following deliverables:
-   - Complete manuscript file
+   - Complete manuscript file (with LLM disclosure in Methods and Acknowledgments if enabled)
    - Title page (with author info, word count, key points if required)
    - Reporting guideline checklist (filled)
-   - Cover letter draft
+   - Cover letter draft (with AI disclosure paragraph if enabled)
 6. **Format conversion.** Convert the final manuscript to publication formats:
    - PDF: `pandoc manuscript.md -o manuscript.pdf --pdf-engine=xelatex -V geometry:margin=1in -V fontsize=11pt -V mainfont="Times New Roman"`
    - DOCX: `pandoc manuscript.md -o manuscript.docx`
@@ -480,6 +486,82 @@ This skill orchestrates other skills at specific phases:
 | 8+ | `/find-journal` | Journal scope for cover letter (optional) |
 
 If a called skill is not available, perform that step inline using the relevant section of this skill document as guidance.
+
+---
+
+## LLM Writing Disclosure
+
+When LLM disclosure is enabled (default), the skill generates transparency statements
+compliant with ICMJE 2025 and COPE guidelines. The user can disable this with `--no-llm-disclosure`.
+
+### Why Default ON
+
+Major journals (Nature, Lancet, Radiology, JAMA) and the ICMJE (2025 update) require
+disclosure of AI writing assistance. Omitting disclosure risks rejection or retraction.
+The default-on design protects the user; they can opt out for journals with no such policy
+or when LLM assistance was minimal.
+
+### Disclosure Locations (3 places)
+
+#### 1. Methods Section — Last Paragraph
+
+Insert at the end of the Methods section, after the ethics statement:
+
+**Template (adapt to specifics):**
+```
+[AI-Assisted Writing Disclosure]
+An artificial intelligence language model (Claude, Anthropic) was used to assist with
+manuscript drafting, including structuring sections, refining prose, and verifying
+internal consistency of reported statistics. All content was critically reviewed,
+verified against source data, and approved by all authors. The AI tool was not involved
+in study design, data collection, data analysis, or interpretation of results.
+```
+
+**Customization rules:**
+- Replace "Claude, Anthropic" with the actual tool(s) used.
+- List specific tasks the LLM performed (drafting, editing, literature search, statistical code).
+- If the LLM was also used for data analysis (e.g., statistical code generation via
+  `/analyze-stats`), state this explicitly: "was also used to generate statistical
+  analysis code, which was reviewed and validated by [statistician/author]."
+- Keep to 2-3 sentences. Do not over-explain.
+
+#### 2. Acknowledgments Section
+
+**Template:**
+```
+The authors acknowledge the use of [Claude/tool name] ([Anthropic/developer]) for
+writing assistance in preparing this manuscript. The authors retain full responsibility
+for the content.
+```
+
+#### 3. Cover Letter — AI Disclosure Paragraph (Phase 8+)
+
+**Template:**
+```
+In accordance with [Journal Name]'s policy on AI-assisted writing, we disclose that
+[Claude/tool name] was used to assist with manuscript preparation, specifically
+[list tasks: drafting, language editing, statistical code review]. All authors have
+reviewed and take responsibility for the final content. The AI tool was not listed
+as an author and did not contribute to study conception, design, or data interpretation.
+```
+
+### What NOT to Disclose
+
+- Do not disclose routine use of grammar checkers (Grammarly, Word spell-check) — these
+  are not considered generative AI under current ICMJE guidance.
+- Do not disclose use of reference managers (Zotero, EndNote) or statistical software
+  (R, Python) unless the LLM generated the analysis code.
+
+### Journal-Specific Overrides
+
+Some journals have stricter requirements:
+- **Science/AAAS**: Most restrictive. LLM use limited; treated as potential misconduct if undisclosed.
+- **Lancet**: Permits only "readability and language" improvements.
+- **Nature**: Requires Methods section disclosure. AI-generated images banned.
+- **Radiology/RSNA**: Requires CLAIM 2024 checklist for AI studies; explicit AI disclosure for writing.
+
+When a journal profile is loaded in Phase 0, check for journal-specific AI policies
+and adjust the disclosure language accordingly.
 
 ---
 
