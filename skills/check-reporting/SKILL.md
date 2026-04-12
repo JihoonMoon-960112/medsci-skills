@@ -1,7 +1,7 @@
 ---
 name: check-reporting
-description: Check manuscript compliance with medical research reporting guidelines. Supports 22 guidelines including STROBE, CONSORT, STARD, STARD-AI, TRIPOD, TRIPOD+AI, ARRIVE, PRISMA, PRISMA-DTA, CARE, SPIRIT, CLAIM, MI-CLEAR-LLM, SQUIRE 2.0, CLEAR, MOOSE, GRRAS, and risk of bias tools (QUADAS-2, RoB 2, ROBINS-I, PROBAST, NOS). Generates item-by-item assessment with PRESENT/MISSING/PARTIAL status.
-triggers: checklist, reporting guideline, STROBE, CONSORT, STARD, STARD-AI, TRIPOD, PRISMA, PRISMA-DTA, ARRIVE, CARE, CLAIM, MI-CLEAR-LLM, SPIRIT, QUADAS, RoB, ROBINS, PROBAST, NOS, risk of bias, compliance check, LLM accuracy
+description: Check manuscript compliance with medical research reporting guidelines. Supports 33 guidelines including STROBE, CONSORT, STARD, STARD-AI, TRIPOD, TRIPOD+AI, ARRIVE, PRISMA, PRISMA-DTA, PRISMA-P, CARE, SPIRIT, CLAIM, MI-CLEAR-LLM, SQUIRE 2.0, CLEAR, MOOSE, GRRAS, SWiM, AMSTAR 2, and risk of bias tools (QUADAS-2, QUADAS-C, RoB 2, ROBINS-I, ROBINS-E, ROBIS, ROB-ME, PROBAST, PROBAST+AI, NOS, COSMIN, RoB NMA). Generates item-by-item assessment with PRESENT/MISSING/PARTIAL status.
+triggers: checklist, reporting guideline, STROBE, CONSORT, STARD, STARD-AI, TRIPOD, PRISMA, PRISMA-DTA, PRISMA-P, ARRIVE, CARE, CLAIM, MI-CLEAR-LLM, SPIRIT, QUADAS, QUADAS-C, RoB, ROBINS, ROBINS-E, ROBIS, ROB-ME, PROBAST, NOS, COSMIN, AMSTAR, SWiM, risk of bias, compliance check, LLM accuracy
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---
@@ -43,6 +43,16 @@ compliance report suitable for journal submission.
   - `CLEAR.md` -- radiomics studies (CC BY 4.0, Kocak et al. Insights Imaging 2023)
   - `MOOSE.md` -- meta-analysis of observational studies (Stroup et al. JAMA 2000)
   - `GRRAS.md` -- reliability and agreement studies (Kottner et al. J Clin Epidemiol 2011)
+  - `QUADAS_C.md` -- comparative DTA risk of bias, extension to QUADAS-2 (CC BY 4.0, Yang et al. 2021)
+  - `ROBINS_E.md` -- non-randomised exposure studies risk of bias (CC BY-NC-ND 4.0, Higgins et al. Environ Int 2024)
+  - `ROBIS.md` -- risk of bias in systematic reviews (Whiting et al. J Clin Epidemiol 2016)
+  - `ROB_ME.md` -- risk of bias due to missing evidence in meta-analysis (CC BY-NC-ND 4.0, Page et al. BMJ 2023)
+  - `PROBAST_AI.md` -- prediction model risk of bias, updated for AI/ML (Moons et al. BMJ 2025)
+  - `COSMIN_RoB.md` -- reliability/measurement error risk of bias (Mokkink et al. BMC Med Res Methodol 2020)
+  - `RoB_NMA.md` -- risk of bias in network meta-analysis (Lunny et al. 2024)
+  - `AMSTAR2.md` -- quality of systematic reviews (Shea et al. BMJ 2017)
+  - `PRISMA_P.md` -- systematic review protocols (Shamseer et al. BMJ 2015)
+  - `SWiM.md` -- synthesis without meta-analysis reporting (Campbell et al. BMJ 2020)
 - If a local checklist file is not found for a requested guideline, the skill constructs checklist items from its knowledge of the guideline.
 
 ---
@@ -67,8 +77,14 @@ user specification.
 | Meta-analysis of observational studies | MOOSE | PRISMA 2020 (use both) |
 | Risk of bias (DTA studies) | QUADAS-2 | -- |
 | Risk of bias (RCTs) | RoB 2 | -- |
-| Risk of bias (non-randomised studies) | ROBINS-I | -- |
+| Risk of bias (non-randomised intervention studies) | ROBINS-I | -- |
+| Risk of bias (non-randomised exposure studies) | ROBINS-E | -- |
+| Risk of bias (comparative DTA studies) | QUADAS-C | QUADAS-2 (use both) |
 | Risk of bias (prediction models) | PROBAST | PROBAST+AI |
+| Risk of bias (systematic reviews) | ROBIS | AMSTAR 2 |
+| Risk of bias (missing evidence in MA) | ROB-ME | -- |
+| Risk of bias (network meta-analysis) | RoB NMA | -- |
+| Risk of bias (measurement properties) | COSMIN RoB | -- |
 | Quality assessment (observational) | NOS | -- |
 | Case report | CARE | -- |
 | Study protocol | SPIRIT | SPIRIT-AI |
@@ -76,6 +92,9 @@ user specification.
 | AI/ML study in clinical imaging | CLAIM 2024 | -- |
 | LLM accuracy evaluation in healthcare | MI-CLEAR-LLM | STARD-AI or CLAIM 2024 (use alongside) |
 | Reliability / agreement study | GRRAS | -- |
+| SR protocol | PRISMA-P | -- |
+| Synthesis without meta-analysis | SWiM | PRISMA 2020 (use both) |
+| Quality of systematic reviews | AMSTAR 2 | ROBIS |
 | Radiomics study | CLEAR | CLAIM 2024 (if deep learning component) |
 | Educational / QI study | SQUIRE 2.0 | -- |
 
