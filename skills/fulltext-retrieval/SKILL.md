@@ -1,12 +1,14 @@
 ---
 name: fulltext-retrieval
-description: Batch download open-access PDFs by DOI using legitimate OA APIs (Unpaywall, PMC, OpenAlex, Crossref).
+description: Batch download open-access PDFs by DOI using legitimate OA APIs (Unpaywall, PMC, OpenAlex, Crossref). Optional PDF→Markdown conversion for token-efficient LLM analysis.
 triggers:
   - PDF download
   - fulltext retrieval
   - open access PDF
   - batch download papers
   - meta-analysis PDF
+  - PDF to markdown
+  - convert PDF
 ---
 
 # Fulltext Retrieval Skill
@@ -105,8 +107,67 @@ curl -s "https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?ids=${DOI}&format=j
 
 The script uses 0.3–0.5 second delays between requests.
 
+## PDF → Markdown Conversion (Optional)
+
+After downloading PDFs, convert them to LLM-friendly Markdown for token-efficient repeated analysis. Uses [pymupdf4llm](https://github.com/pymupdf/RAG) — optimized for academic papers with two-column layout handling and table preservation.
+
+### Quick Start
+
+```bash
+# Install (one-time)
+pip install pymupdf4llm
+
+# Convert all PDFs in a directory
+python pdf_to_md.py pdfs/
+
+# Convert with verbose output
+python pdf_to_md.py pdfs/ -v
+
+# Custom output directory
+python pdf_to_md.py pdfs/ -o markdown/
+
+# First 10 pages only (useful for long supplements)
+python pdf_to_md.py pdfs/ --pages 0-9
+
+# Overwrite existing conversions
+python pdf_to_md.py pdfs/ --force
+```
+
+### Combined Workflow
+
+```bash
+# Step 1: Download PDFs
+python fetch_oa.py dois.txt -o pdfs/ -e your@email.com
+
+# Step 2: Convert to Markdown (only successful downloads)
+python pdf_to_md.py pdfs/ -v
+```
+
+After conversion, `.md` files sit alongside `.pdf` files. Claude Code can then use `Read` for full content or `Grep` for targeted extraction — significantly more token-efficient than re-reading PDFs.
+
+### When to Convert
+
+| Scenario | Recommendation |
+|----------|---------------|
+| Screening/triage (read once) | Skip — read PDF directly |
+| Data extraction from k≥5 studies | Convert — repeated reads save tokens |
+| Meta-analysis full pipeline | Convert — papers referenced across multiple phases |
+| Single paper deep review | Optional — marginal benefit |
+
+### Academic Paper Defaults
+
+- **Images**: Skipped (saves tokens; figures referenced by caption text)
+- **Tables**: `lines_strict` strategy (preserves grid-line tables accurately)
+- **Layout**: Two-column academic layout handled automatically
+- **Headers/footers**: Removed by pymupdf4llm
+
+### Dependency Note
+
+`pdf_to_md.py` requires [pymupdf4llm](https://pypi.org/project/pymupdf4llm/) (AGPL-3.0). This is an **optional** dependency — `fetch_oa.py` remains stdlib-only with zero external dependencies. The AGPL license applies to pymupdf4llm itself, not to this skill.
+
 ## Limitations
 
 - Only retrieves **open-access** articles. Paywalled articles require institutional access.
 - Landing page scraping may fail on publisher-specific JavaScript-heavy pages.
 - Some recent articles may not yet be indexed by OA sources.
+- PDF→Markdown quality depends on the PDF's text layer. Scanned-only PDFs may produce poor output.

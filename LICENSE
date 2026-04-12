@@ -40,3 +40,11 @@ Users should download them directly from official sources:
 - CARE: https://www.care-statement.org
 - SPIRIT: https://www.spirit-statement.org (CC BY-NC-ND)
 - CLAIM 2024: https://pubs.rsna.org/doi/10.1148/radiol.2020200267
+
+## Optional Dependencies
+
+The following external packages are NOT bundled but may be installed separately by the user:
+
+- pymupdf4llm: AGPL-3.0 or Artifex Commercial License (https://pymupdf.readthedocs.io)
+  Used by: fulltext-retrieval/pdf_to_md.py (optional PDF→Markdown conversion)
+  Install: pip install pymupdf4llm
