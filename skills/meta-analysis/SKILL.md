@@ -23,6 +23,7 @@ with specialized support for diagnostic test accuracy (DTA) meta-analyses.
 ### Built-in References (`${CLAUDE_SKILL_DIR}/references/`)
 
 - **PROSPERO template**: `${CLAUDE_SKILL_DIR}/references/PROSPERO_template.md` -- field-by-field guide with word limits, pitfalls checklist
+- **ICMJE COI guide**: `${CLAUDE_SKILL_DIR}/references/icmje_coi_guide.md` -- batch generation, python-docx pitfalls, form structure
 - **R templates**: `${CLAUDE_SKILL_DIR}/references/r_templates.md`
 - **Checklists**: `${CLAUDE_SKILL_DIR}/references/checklists/`
   - `PRISMA_DTA.md` -- 27-item checklist
