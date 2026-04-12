@@ -22,6 +22,7 @@ with specialized support for diagnostic test accuracy (DTA) meta-analyses.
 
 ### Built-in References (`${CLAUDE_SKILL_DIR}/references/`)
 
+- **PROSPERO template**: `${CLAUDE_SKILL_DIR}/references/PROSPERO_template.md` -- field-by-field guide with word limits, pitfalls checklist
 - **R templates**: `${CLAUDE_SKILL_DIR}/references/r_templates.md`
 - **Checklists**: `${CLAUDE_SKILL_DIR}/references/checklists/`
   - `PRISMA_DTA.md` -- 27-item checklist
@@ -83,10 +84,15 @@ Auto-detect type from the research question or accept user specification.
    - Subgroup / sensitivity analysis plan
    - Publication bias assessment plan
 
-6. **Generate protocol document** (Word or Markdown):
-   - PROSPERO-compatible format
-   - Include all 22 PROSPERO fields
-   - Save to project directory
+6. **Generate PROSPERO registration document**:
+   - Read `${CLAUDE_SKILL_DIR}/references/PROSPERO_template.md` for field-by-field guidance
+   - Generate all fields with word counts (stay within limits per field)
+   - Structure: title, review question, PICO, searches, data collection, outcomes, synthesis, subgroups, stage, affiliation
+   - For mixed designs (comparative + single-arm): explicitly address comparator for both arms
+   - For RoB: map tool to study design (NOS for comparative, JBI for case series → select "Other" in form)
+   - Output: Markdown + DOCX (via pandoc) for copy-paste into PROSPERO web form
+   - Append Common Pitfalls Checklist (HTML entities, word limits, stage constraint)
+   - Save to project `7_Submission/` or equivalent directory
 
 ### Phase 2: Search Strategy
 
