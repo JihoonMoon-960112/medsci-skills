@@ -215,6 +215,7 @@ Values used as placeholders for missing data in legacy systems:
 | -1, -9, -99 | Missing / not applicable |
 | 0 | Could be true zero OR missing -- context-dependent |
 | 88, 77 | "Not applicable" or "Refused" in survey data |
+| 8888 | "Not applicable" or "Missing" in health screening/institutional databases |
 | 01/01/1900 | Default/missing date |
 
 **Action**: Replace sentinel values with `NaN` BEFORE computing any statistics.

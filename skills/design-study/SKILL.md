@@ -163,6 +163,13 @@ Recommend one primary guideline:
 - feature timing mismatch
 - no calibration
 
+### Retrospective cohort / screening database
+- **time zero misalignment**: cohort entry ≠ follow-up start → immortal time bias
+- interval-censored outcomes treated as exact → underestimation of event times
+- healthy volunteer bias unacknowledged → inflated external validity claims
+- surveillance bias from unequal follow-up frequency between groups
+- **3 bias classification (Hernan/Robins)**: selection bias (who enters), information bias (how measured), confounding (what else differs) — explicitly map each threat
+
 ### Multimodal LLM / report generation
 - no clear rubric for clinical correctness
 - benchmark labels derived from noisy reports without adjudication

@@ -84,6 +84,11 @@ This is the most scrutinized paragraph. Write it with care.
 
 **Last sentence**: A future study recommendation is acceptable here.
 
+**Study-design-specific limitation templates**:
+
+- **Healthy volunteer / screening cohort bias**: Participants in voluntary health screening programs tend to be healthier, more health-conscious, and of higher socioeconomic status than the general population. This selection bias may limit generalizability and likely underestimates event rates compared to population-based cohorts. Mitigations: report the cohort's baseline characteristics against national statistics; acknowledge the direction of bias explicitly.
+- **Surveillance bias (repeated screening)**: Participants with more frequent follow-up visits have higher probability of outcome detection. If the number of follow-up visits differs between groups, this asymmetry may inflate apparent event rates in the more-screened group. Report the number of scans/visits per participant (median, IQR) and note any group imbalance in surveillance intensity.
+
 ### Conclusion (Final Paragraph or Final Sentences)
 
 - Must align with the Purpose statement from the Introduction

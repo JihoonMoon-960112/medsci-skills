@@ -66,6 +66,12 @@ For ordinal ratings, inter-rater agreement was assessed using the weighted kappa
 ### Template
 Overall survival and progression-free survival were estimated using the Kaplan-Meier method and compared between groups using the log-rank test. Median survival times were reported with 95% CIs. Multivariable analysis was performed using the Cox proportional hazards model, reporting hazard ratios (HRs) with 95% CIs. The proportional hazards assumption was verified using Schoenfeld residuals. Variables with P < .10 on univariable analysis were included in the multivariable model.
 
+### Template (Retrospective Cohort — Time Zero + Interval Censoring)
+Time zero was defined as the date of the first {qualifying examination / treatment / enrollment}. {Outcome} status was ascertained at subsequent {screening visits / follow-up examinations}, and the exact date of {outcome} onset was unknown. Therefore, the time to {outcome} was interval-censored between the last {negative / event-free} examination and the first {positive / event-detected} examination. Participants who remained {event-free / negative} at the last available examination were right-censored at that date. Standard Kaplan-Meier estimates were reported for comparability with prior literature, and interval-censored analyses using the Turnbull nonparametric maximum likelihood estimator were performed as {primary analysis / sensitivity analysis}.
+
+### Template (Competing Risks)
+Cumulative incidence of {primary outcome} was estimated using the cumulative incidence function (CIF), accounting for {competing event, e.g., non-cardiovascular death} as a competing risk. Group differences in cumulative incidence were compared using Gray test. The association between covariates and {primary outcome} was assessed using the Fine-Gray subdistribution hazard model, reporting subdistribution hazard ratios (sHRs) with 95% CIs. Cause-specific Cox proportional hazards models were also fitted for etiologic interpretation.
+
 ---
 
 ## 6. Sample Size Justification

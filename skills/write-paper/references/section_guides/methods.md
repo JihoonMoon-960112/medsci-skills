@@ -32,6 +32,7 @@ Write Methods in PICO order. This provides a natural, logical flow that reviewer
 - Inclusion criteria (specific, operationalized)
 - Exclusion criteria (with clinical justification for each)
 - How patients were identified (database query, consecutive enrollment, etc.)
+- **Time zero definition** (critical for retrospective cohorts): State explicitly when follow-up begins. For screening cohorts, time zero is typically the date of the first qualifying examination. For treatment studies, time zero is the date of treatment initiation. Misaligned time zero introduces immortal time bias. If there is a gap between eligibility assessment and time zero (e.g., cohort entry defined by a lab value but follow-up starting at a later visit), describe how this was handled.
 
 **Common pitfalls to avoid**:
 - Including inappropriate subjects (e.g., young adults in a pediatric study)

@@ -357,6 +357,29 @@ tbl %>% as_flex_table() %>% flextable::save_as_docx(path = "table.docx")
 - Cox proportional hazards: report HR (95% CI)
 - Check proportional hazards assumption (Schoenfeld residuals)
 - Report median survival with 95% CI
+- **Warranty period / T25**: Time to 25% cumulative incidence. Use `quantile()` from KM fit. If event rate < 25%, report "not reached" and consider Weibull parametric extrapolation for estimation
+
+### Interval-Censored Survival
+
+When exact event times are unknown (e.g., health screening cohorts where status changes are detected at periodic visits), standard KM underestimates time-to-event. Use interval-censored methods:
+
+- **R packages**: `icenReg` (parametric/semi-parametric IC regression), `interval` (NPMLE/Turnbull), `survival` (Surv type "interval2")
+- **Turnbull estimator**: Non-parametric MLE for interval-censored data — analogous to KM but accounts for the interval between last negative and first positive observation
+- **Parametric IC models**: Weibull or log-logistic via `icenReg::ic_par()`. Report shape/scale parameters and compare AIC across distributions
+- **Mid-point imputation**: Simple approximation — event time = midpoint of (last negative, first positive). Acceptable as sensitivity analysis but NOT as primary method
+- **When to use**: Serial measurement cohorts (e.g., health screening databases), cancer screening intervals, repeated biomarker assessments
+- **Reporting**: State the interval-censored nature of the data explicitly in Methods. Report both standard KM (for comparability with prior literature) and IC estimates (as primary or sensitivity)
+
+### Competing Risks
+
+When death or other events preclude the outcome of interest, standard KM overestimates cumulative incidence (treats competing events as censored). Use competing risk methods:
+
+- **R packages**: `cmprsk` (Fine-Gray), `tidycmprsk` (tidy interface), `survival` (cause-specific Cox)
+- **Cumulative incidence function (CIF)**: `cmprsk::cuminc()` — replaces 1-KM for each event type. Gray's test for group comparison
+- **Fine-Gray subdistribution hazard**: `cmprsk::crr()` or `tidycmprsk::crr()` — reports subdistribution HR (sHR) with 95% CI. Interpretable as effect on CIF directly
+- **Cause-specific Cox**: Standard Cox censoring competing events — reports cause-specific HR. Better for etiology; Fine-Gray better for prognosis/prediction
+- **When to use**: Mortality studies with multiple causes of death, cardiovascular events when non-CV death is frequent, any outcome where competing events are common (>5% of total events)
+- **Reporting**: Present CIF plots (NOT 1-KM) when competing risks exist. Report both cause-specific HR and subdistribution HR when the research question is etiologic. State which competing events were defined
 
 ### Group Comparison
 
