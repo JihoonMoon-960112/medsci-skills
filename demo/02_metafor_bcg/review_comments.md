@@ -38,15 +38,11 @@ Fatal flags: 0
 
 ## Auto-Fix Summary (Phase 7.4)
 
-- **Iteration**: 1/2
-- **Fixed**: 5 issues (M3, M4, m3, m4, m5)
-- **Skipped (requires human/analysis)**: 4 issues (M1, M2, m1, m2)
-- **Changes applied**:
-  - M3: Added explicit novelty statement (updated methods vs. Colditz 1994)
-  - M4: Added search strategy detail/availability note in Methods
-  - m3: Strengthened prediction interval clinical interpretation in Discussion
-  - m4: Replaced generic limitations opener with specific lead-in
-  - m5: Added demonstration disclaimer to PRISMA flow numbers
+- **Iteration 1**: Fixed 5 issues (M3, M4, m3, m4, m5) — score 72 → 79
+- **Iteration 2**: Fixed 2 partial mitigations (M1 GRADE caveat, M2 RoB caveat) + AI pattern polish — score 79 → 82
+- **Total fixed**: 7 issue-actions across 2 iterations
+- **Skipped (requires human/analysis)**: M1 (full GRADE assessment), M2 (per-study RoB data), m1 (reference verification), m2 (BCG strain analysis)
+- **Auto-fix limit reached**: Remaining issues require human review or additional data extraction.
 
 ## Strengths
 
@@ -61,16 +57,17 @@ Fatal flags: 0
   "self_review_version": "1.0",
   "manuscript_title": "BCG Vaccination and Tuberculosis Risk: A Re-Analysis Meta-Analysis",
   "date": "2026-04-14",
-  "overall_score": 79,
+  "overall_score": 82,
   "verdict": "REVISE",
-  "post_fix_score": 79,
+  "post_fix_score": 82,
   "post_fix_verdict": "REVISE",
-  "fix_iterations": 1,
-  "fixed_count": 5,
+  "fix_iterations": 2,
+  "auto_fix_limit_reached": true,
+  "fixed_count": 7,
   "skipped_count": 4,
   "fatal_count": 0,
   "major_count": 4,
   "minor_count": 5,
-  "note": "Score below 80 due to unfixable issues (GRADE, RoB) requiring human judgment. Auto-fix limit note: remaining issues require human review."
+  "note": "Score below 85 threshold after 2 fix iterations. Remaining issues (GRADE, RoB, references, strain) require human judgment. Auto-fix limit reached."
 }
 ```

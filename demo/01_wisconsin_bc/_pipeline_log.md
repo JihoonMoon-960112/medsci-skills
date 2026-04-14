@@ -11,7 +11,7 @@ Mode: --e2e (autonomous)
 | 3 | `/write-paper --autonomous` | PASS | manuscript.md (~1,800 words) |
 | 4 | Phase 7.1: AI Pattern Scan | PASS | 0 forbidden patterns detected |
 | 5 | `/check-reporting --json` (STARD 2015) | PASS | reporting_checklist.md, 5 items auto-fixed (compliance 67.9% → 82.1%) |
-| 6 | `/self-review --json --fix` | PASS | review_comments.md, score 74→80/100, verdict REVISE→PASS, 6 issues fixed (1 iteration) |
+| 6 | `/self-review --json --fix` | PASS | review_comments.md, score 74→83/100, verdict REVISE (2 iterations, auto-fix limit reached) |
 | 7 | Phase 7.6: DOCX Build | PASS | manuscript_final.docx (pandoc) |
 | 8 | `/present-paper` (bonus) | PASS | presentation.pptx (12 slides, speaker notes) |
 
@@ -22,7 +22,7 @@ Mode: --e2e (autonomous)
 - **Table count**: 2 (demographics, diagnostic accuracy)
 - **Reporting guideline**: STARD 2015
 - **Compliance**: 82.1% (23/28 applicable items PRESENT)
-- **Self-review score**: 80/100 (PASS)
+- **Self-review score**: 83/100 (REVISE, auto-fix limit reached)
 - **References**: 4 (all marked [UNVERIFIED] — demo dataset)
 - **AI pattern scan**: PASS (0 forbidden patterns)
 - **FATAL flags**: None
@@ -38,15 +38,14 @@ Mode: --e2e (autonomous)
 | 10a (Cut-offs) | Added pre-specified 0.5 threshold statement |
 
 ## Self-Review Fix Loop (Phase 7.4)
-
-- Initial score: 74 → Final score: 80
-- Fix iterations: 1/2
-- Fixed issues: 6 (M2, M3, M4, m3, m4, m5)
-- Remaining issues (human review needed): 3 (M1: calibration analysis, m1: reference verification, m2: proportion CIs)
-- Final verdict: PASS
+- Initial score: 74 → After iter 1: 80 → After iter 2: 83
+- Fix iterations: 2/2 (limit reached)
+- Fixed issues: 6 (iter 1) + 2 partial mitigations (iter 2)
+- Remaining issues (human review needed): M1 (calibration analysis), m1 (reference verification), m2 (proportion CIs)
+- Final verdict: REVISE (auto-fix limit reached; score 83 < 85 threshold)
 
 ## Notes
 
 - All 5 pipeline steps completed successfully.
-- Self-review fix loop applied 6 fixes in 1 iteration, raising the score from 74 (REVISE) to 80 (PASS). Three issues remain for human review (M1: calibration, m1: references, m2: proportion CIs).
+- Self-review fix loop applied 8 issue-actions across 2 iterations, raising the score from 74 to 83. Auto-fix limit reached (score 83 < 85 threshold). Three issues remain for human review (M1: calibration analysis, m1: reference verification, m2: proportion CIs).
 - References marked [UNVERIFIED] as expected for a demo — citation verification was not run to conserve context.

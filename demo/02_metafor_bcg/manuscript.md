@@ -48,7 +48,7 @@ Two reviewers independently screened titles and abstracts, followed by full-text
 
 ### Risk of Bias Assessment
 
-Risk of bias was assessed using the Cochrane Risk of Bias tool. Allocation concealment, blinding, and completeness of follow-up were evaluated for each trial.
+Risk of bias was assessed using the Cochrane Risk of Bias tool. Allocation concealment, blinding, and completeness of follow-up were evaluated for each trial. Individual study risk of bias assessments using the Cochrane Risk of Bias tool were planned but not completed for this demonstration analysis. In a full systematic review, a traffic-light summary and risk of bias table would be mandatory.
 
 ### Statistical Analysis
 
@@ -88,15 +88,17 @@ Egger's regression test (t = -1.40, p = 0.189) and Begg's rank correlation test 
 
 ## Discussion
 
-This meta-analysis of 13 randomized controlled trials demonstrated that BCG vaccination reduced tuberculosis risk by approximately 51%, with a pooled risk ratio of 0.489 (95% CI: 0.344-0.696). The protective effect was robust across sensitivity analyses, and no individual study exerted undue influence on the summary estimate. Publication bias was not detected by formal statistical tests.
+This meta-analysis of 13 randomized controlled trials demonstrated that BCG vaccination reduced tuberculosis risk by approximately 51%, with a pooled risk ratio of 0.489 (95% CI: 0.344-0.696). The protective effect was stable across sensitivity analyses, and no individual study exerted undue influence on the summary estimate. Publication bias was not detected by formal statistical tests.
 
 The most notable finding was the pronounced geographic gradient in vaccine efficacy. Meta-regression identified absolute latitude as a potent moderator, explaining 75.6% of between-study heterogeneity. Trials conducted closer to the equator consistently reported lower protective efficacy, consistent with the hypothesis that environmental NTM exposure in tropical regions provides cross-reactive immunity that attenuates the incremental benefit of BCG vaccination. This finding aligns with the landmark analysis by Colditz et al. and has been corroborated by ecological studies demonstrating higher NTM prevalence at lower latitudes.
 
 Subgroup analysis by allocation method did not reveal statistically significant differences, suggesting that variations in randomization procedures did not systematically bias the findings. The prediction interval (0.155-1.549) warrants particular attention because its upper bound exceeds unity, meaning that a new trial conducted in a different setting could plausibly observe no protective benefit or even a slight increase in tuberculosis risk among vaccinated individuals. This has direct policy implications: national immunization programs in low-latitude regions cannot rely on the pooled estimate alone to justify BCG vaccination for tuberculosis prevention, and the expected benefit in any individual setting remains uncertain despite the favorable overall average.
 
+A formal GRADE certainty-of-evidence assessment was not performed, which limits the strength of recommendations that can be drawn from this analysis. The overall certainty of evidence is likely low given the high between-study heterogeneity and observational nature of most included studies.
+
 The most consequential limitation is the age of the evidence base: the included trials were conducted between 1948 and 1980, and the epidemiology of tuberculosis has evolved considerably in the intervening decades. Second, the dataset does not capture information on BCG strain, which may contribute to between-study variability. Third, the prediction interval crossing unity indicates persistent uncertainty regarding the expected effect in any individual new setting. Fourth, assessment of additional moderators was limited by the small number of included studies (k = 13).
 
-In conclusion, BCG vaccination reduced tuberculosis risk by approximately half across 13 randomized trials encompassing over 350,000 participants. The geographic latitude of the study site was the dominant source of heterogeneity, consistent with the environmental mycobacteria hypothesis. These findings support the continued use of BCG vaccination, particularly in higher-latitude settings, while underscoring the need for next-generation tuberculosis vaccines with more consistent efficacy across geographic regions.
+In conclusion, BCG vaccination reduced tuberculosis risk by approximately half across 13 randomized trials encompassing over 350,000 participants. The geographic latitude of the study site was the dominant source of heterogeneity, consistent with the environmental mycobacteria hypothesis. These findings support the continued use of BCG vaccination, particularly in higher-latitude settings, while highlighting the need for next-generation tuberculosis vaccines with more consistent efficacy across geographic regions.
 
 ## References
 

@@ -300,7 +300,7 @@ When `--json` is passed, or when invoked by `/write-paper` Phase 7, append a mac
 
 **Field definitions:**
 - `overall_score`: Integer 0-100 reflecting manuscript submission readiness
-- `verdict`: `"PASS"` (score >= 80, no fatal issues) or `"REVISE"`
+- `verdict`: `"PASS"` (score >= 85, no fatal issues) or `"REVISE"`
 - `severity`: `"fatal"`, `"major"`, or `"minor"`
 - `category`: Letter code from the 10-category system (A-J)
 - `fixable_by_ai`: `true` if the issue can be resolved by editing manuscript text with existing data; `false` if it requires new data, analyses, or human judgment (e.g., design changes, IRB decisions, missing experiments)

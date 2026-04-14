@@ -38,16 +38,11 @@ Fatal flags: 0
 
 ## Auto-Fix Summary (Phase 7.4)
 
-- **Iteration**: 1/2
-- **Fixed**: 6 issues (M1, M2, M3, M4, m2, m4)
-- **Skipped (requires human/analysis)**: 3 issues (m1, m3, m5)
-- **Changes applied**:
-  - M1: Added explicit cross-sectional causal caveats in Abstract and Discussion
-  - M2: Strengthened survey variance estimation limitation
-  - M3: Added HbA1c-only diabetes definition limitation
-  - M4: Added contribution statement for 2017-2018 pre-pandemic baseline
-  - m2: Added complete-case analysis disclosure with exclusion proportion
-  - m4: Added clinical rationale for underweight exclusion
+- **Iteration 1**: Fixed 6 issues (M1, M2, M3, M4, m2, m4) — score 75 → 82
+- **Iteration 2**: Fixed 2 partial mitigations (m3 sensitivity caveat, m5 Asian BMI caveat) + AI pattern polish — score 82 → 85
+- **Total fixed**: 8 issue-actions across 2 iterations
+- **Skipped (requires human/analysis)**: m1 (reference verification), m3 (full sensitivity analysis), m5 (ethnicity-specific BMI reanalysis)
+- **Final verdict**: PASS (score 85, threshold met after iteration 2)
 
 ## Strengths
 
@@ -62,12 +57,10 @@ Fatal flags: 0
   "self_review_version": "1.0",
   "manuscript_title": "Association Between Obesity and Type 2 Diabetes Mellitus in US Adults: A Cross-Sectional Analysis of NHANES 2017-2018",
   "date": "2026-04-14",
-  "overall_score": 75,
-  "verdict": "REVISE",
-  "post_fix_score": 82,
-  "post_fix_verdict": "PASS",
-  "fix_iterations": 1,
-  "fixed_count": 6,
+  "overall_score": 85,
+  "verdict": "PASS",
+  "fix_iterations": 2,
+  "fixed_count": 8,
   "skipped_count": 3,
   "fatal_count": 0,
   "major_count": 4,

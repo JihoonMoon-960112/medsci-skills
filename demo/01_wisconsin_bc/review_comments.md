@@ -60,24 +60,31 @@ R0-9 [MIN] m5: "Screening" vs "diagnostic workup" in conclusion
 
 ## Auto-Fix Summary (Phase 7.4)
 
-- **Iteration**: 1/2
-- **Fixed**: 6 issues (M2, M3, M4, m3, m4, m5)
-- **Skipped (requires human/analysis)**: 3 issues (M1, m1, m2)
-- **Changes applied**:
+- **Iteration 1**: Fixed 6 issues (M2, M3, M4, m3, m4, m5) — score 74 → 80
+- **Iteration 2**: Fixed 2 partial mitigations (M1 text caveat, m2 text caveat) + AI pattern polish — score 80 → 83
+- **Total fixed**: 8 issue-actions across 2 iterations
+- **Skipped (requires human/analysis)**: M1 (full calibration analysis), m1 (reference verification), m2 (CI computation)
+- **Auto-fix limit reached**: Remaining issues require human review or new statistical analyses.
+- **Changes applied (iter 1)**:
   - M2: Strengthened external validation limitation statement
   - M3: Added STARD-compliant novelty framing in Discussion
   - M4: Added hyperparameter selection rationale in Methods
   - m3: Replaced generic limitations opener with specific lead-in
   - m4: Added synthetic data disclosure for age/sex variables
   - m5: Changed "screening" to "diagnostic workup" in Abstract conclusion
+- **Changes applied (iter 2)**:
+  - M1: Added calibration limitation caveat in Results and Discussion
+  - m2: Added missing proportion CI note in Table 2 legend and Results
 
 ```json
 {
   "self_review_version": "1.0",
   "manuscript_title": "Machine Learning Classification of Breast Cancer Using Fine-Needle Aspiration Cytology Features: A Diagnostic Accuracy Study",
   "date": "2026-04-14",
-  "overall_score": 80,
-  "verdict": "PASS",
+  "overall_score": 83,
+  "verdict": "REVISE",
+  "fix_iterations": 2,
+  "auto_fix_limit_reached": true,
   "fatal_count": 0,
   "major_count": 4,
   "minor_count": 5,
