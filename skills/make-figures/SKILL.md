@@ -150,12 +150,17 @@ To add a new journal template: see `${CLAUDE_SKILL_DIR}/references/visual_abstra
 
 ### Step 1: Specify
 
+**Optional flags:**
+- `--study-type <type>`: One of: `diagnostic-accuracy`, `ai-validation`, `meta-analysis`, `dta-meta-analysis`, `observational-cohort`, `rct`. When set, auto-generate the full figure set from the Study-Type Figure Sets table below without prompting for individual figure types.
+- `--data-dir <path>`: Directory containing analysis outputs (CSVs, `_analysis_outputs.md`). Default: current working directory.
+
 Ask the user for:
-1. **Figure type** (from the supported types below)
+1. **Figure type** (from the supported types below) — skipped when `--study-type` is provided
 2. **Data source** (file path, DataFrame, or manual values)
 3. **Target journal** (for dimension/font requirements)
 4. **Panel layout** (single panel, multi-panel, or let you decide)
 5. **Any special requests** (annotations, highlights, reference lines)
+6. **Study type** (if not passed via `--study-type`): determines the required figure set
 
 If the user provides enough context, infer missing parameters and confirm before proceeding.
 
@@ -248,11 +253,29 @@ When the study type is known (from `/write-paper` Phase 0 or user specification)
 | Observational cohort (STROBE) | Flow diagram, Kaplan-Meier curves (if survival endpoint) |
 | RCT (CONSORT) | CONSORT flow diagram, primary endpoint figure |
 
-After generating all figures, print a manifest:
-- List every output file with its path and one-line description
-- Save the manifest to `figures/_figure_manifest.md`
+After generating all figures, create a structured manifest file at `figures/_figure_manifest.md`:
 
-**Flow diagram limitation:** STARD/CONSORT/PRISMA flow diagrams require D2, Mermaid, or manual tools. If these are unavailable, generate a text-based flow diagram in markdown and note that a graphical version should be created separately.
+```markdown
+# Figure Manifest
+Generated: {YYYY-MM-DD}
+Study type: {study type or "custom"}
+
+| Figure | Path | Type | Tool | Description |
+|--------|------|------|------|-------------|
+| Figure 1 | figures/fig1_stard_flow.svg | flow-diagram | D2 | STARD participant flow diagram |
+| Figure 2 | figures/fig2_roc.pdf | roc-curve | matplotlib | ROC curves for Model A vs B |
+| Figure 3 | figures/fig3_calibration.pdf | calibration | matplotlib | Calibration plot with Hosmer-Lemeshow |
+```
+
+**Manifest field definitions:**
+- **Path**: Relative path from project root
+- **Type**: One of: `flow-diagram`, `roc-curve`, `forest-plot`, `funnel-plot`, `calibration`, `km-curve`, `bland-altman`, `confusion-matrix`, `box-violin`, `bar-chart`, `heatmap`, `pipeline`, `visual-abstract`, `sroc-curve`, `other`
+- **Tool**: Tool used to generate (`matplotlib`, `D2`, `python-pptx`, `seaborn`, etc.)
+- **Description**: One-line description suitable for figure legend context
+
+This manifest is consumed by `/write-paper` Phase 2 (figure embedding) and Phase 7 (DOCX build). It **MUST** exist after figure generation completes. Verify the file is non-empty before finishing.
+
+**Flow diagram generation rule:** STARD/CONSORT/PRISMA flow diagrams **MUST** use D2 (`d2 --layout elk`) as the default tool. Check for D2 availability with `which d2`. If D2 is installed, generate the `.d2` source file and render to SVG. If D2 is NOT available, fall back in this order: (1) attempt `brew install d2`, (2) use Mermaid if available, (3) generate a markdown text-based flow diagram and flag in the manifest with `Tool: markdown-fallback`. Do NOT use matplotlib FancyBboxPatch for flow diagrams — the absolute coordinate approach breaks when text changes.
 
 ---
 

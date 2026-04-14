@@ -210,6 +210,53 @@ Order action items by:
 2. Items in the Methods section (easiest to fix)
 3. Items in other sections
 
+#### Part D: Machine-Readable JSON Summary
+
+Append a fenced JSON block at the end of the report. This enables `/write-paper` Phase 7 and `/orchestrate` to parse compliance results programmatically. This block **MUST** be present when invoked with `--json` flag or when called from `/write-paper` Phase 7. It SHOULD also be present in standard invocations (appended after Part C).
+
+```json
+{
+  "check_reporting_version": "1.0",
+  "manuscript_title": "...",
+  "guideline": "STARD-AI",
+  "guideline_version": "2025",
+  "date": "YYYY-MM-DD",
+  "total_items": 40,
+  "present": 32,
+  "partial": 4,
+  "missing": 3,
+  "na": 1,
+  "compliance_pct": 88.9,
+  "action_items": [
+    {
+      "item_number": 12,
+      "section": "Methods",
+      "item_name": "Sample size justification",
+      "status": "MISSING",
+      "suggested_location": "Methods, after participant description",
+      "suggested_fix": "Add: 'The sample size was determined based on [rationale]. A minimum of [N] cases was required to achieve [target] precision for the primary endpoint.'",
+      "fixable_by_ai": true
+    },
+    {
+      "item_number": 7,
+      "section": "Methods",
+      "item_name": "Blinding of index test to reference standard",
+      "status": "PARTIAL",
+      "current_text": "Readers were blinded",
+      "needed": "Specify what readers were blinded to (reference standard results, clinical information, other reader results)",
+      "suggested_fix": "Expand to: 'Readers interpreted [index test] images blinded to the reference standard results, clinical information, and other readers' assessments.'",
+      "fixable_by_ai": true
+    }
+  ]
+}
+```
+
+**Field definitions:**
+- `compliance_pct`: `present / (total_items - na) * 100`, rounded to one decimal
+- `action_items`: Array of MISSING and PARTIAL items only (PRESENT and N/A excluded)
+- `fixable_by_ai`: `true` if the fix involves inserting or expanding text with information available in the manuscript or inferable from context; `false` if it requires external information (e.g., registration number, IRB approval number, specific protocol details only the author knows)
+- `suggested_fix`: Concrete draft text that can be inserted or used to expand an existing sentence
+
 ---
 
 ## Assessment Standards

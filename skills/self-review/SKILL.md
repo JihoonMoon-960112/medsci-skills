@@ -16,6 +16,11 @@ This is NOT about writing a review. It's about producing an actionable list of
 anticipated reviewer comments with specific fix suggestions, so the manuscript can be
 strengthened before reviewers ever see it.
 
+## Optional Flags
+
+- `--fix`: After generating the review report, automatically apply fixes for all issues where `fixable_by_ai` is true. Edits the manuscript in place, then reports a diff summary. Does NOT fix issues marked `fixable_by_ai: false` (e.g., missing data, design flaws). Maximum 2 fix-and-re-review iterations.
+- `--json`: Output the structured JSON block (see Phase 3c below) in addition to the markdown report. Default when called from `/write-paper` Phase 7.
+
 ## Severity Framing
 
 When flagging issues, classify severity:
@@ -254,7 +259,56 @@ R0-3 [MIN] {mapped from m1}: {issue title}
 When actual reviewer comments arrive as R1-N, the user can cross-reference which issues
 were anticipated (R0) vs. novel (R1-only).
 
+### Phase 3c: Structured JSON Output
+
+When `--json` is passed, or when invoked by `/write-paper` Phase 7, append a machine-readable JSON block after the markdown report. Fence it with triple backticks and the `json` language tag so downstream parsers can extract it.
+
+```json
+{
+  "self_review_version": "1.0",
+  "manuscript_title": "...",
+  "date": "YYYY-MM-DD",
+  "overall_score": 72,
+  "verdict": "REVISE",
+  "fatal_count": 0,
+  "major_count": 3,
+  "minor_count": 4,
+  "issues": [
+    {
+      "id": "M1",
+      "severity": "major",
+      "category": "C",
+      "category_name": "Validation & Stats",
+      "location": "Methods, paragraph 5",
+      "description": "Calibration plot and Brier score absent for prediction model",
+      "fixable_by_ai": true,
+      "suggested_fix": "Add calibration analysis paragraph after discrimination results. Generate calibration plot via /make-figures."
+    },
+    {
+      "id": "m1",
+      "severity": "minor",
+      "category": "F",
+      "category_name": "Reporting Completeness",
+      "location": "Abstract, line 3",
+      "description": "Abstract reports AUC 0.91 but Table 2 shows 0.912 -- rounding inconsistency",
+      "fixable_by_ai": true,
+      "suggested_fix": "Change abstract to match table: AUC 0.91 (95% CI: 0.87-0.95)"
+    }
+  ]
+}
+```
+
+**Field definitions:**
+- `overall_score`: Integer 0-100 reflecting manuscript submission readiness
+- `verdict`: `"PASS"` (score >= 80, no fatal issues) or `"REVISE"`
+- `severity`: `"fatal"`, `"major"`, or `"minor"`
+- `category`: Letter code from the 10-category system (A-J)
+- `fixable_by_ai`: `true` if the issue can be resolved by editing manuscript text with existing data; `false` if it requires new data, analyses, or human judgment (e.g., design changes, IRB decisions, missing experiments)
+- `suggested_fix`: Specific, actionable instruction. If `fixable_by_ai` is true, this must be concrete enough for the fixer to execute without ambiguity.
+
 ### Phase 4: Fix Support
+
+#### Standard mode (no --fix flag)
 
 After presenting the report, offer to help fix specific issues:
 - Rewrite overclaiming sentences
@@ -263,6 +317,30 @@ After presenting the report, offer to help fix specific issues:
 - Draft intended use or novelty statements
 - Check specific tables/figures for consistency
 - Generate missing flow diagrams via `/make-figures`
+
+#### Auto-fix mode (--fix flag)
+
+When `--fix` is passed:
+
+1. **Filter fixable issues**: Select all issues where `fixable_by_ai` is true.
+2. **Apply fixes sequentially**: For each fixable issue, edit the manuscript file directly:
+   - Text rewrites (overclaiming, missing sentences, terminology) → Edit in place
+   - Missing reporting items (ethics statement, data availability) → Insert at suggested location
+   - Numerical inconsistencies (abstract-table mismatch) → Correct to match tables
+   - Do NOT attempt: new statistical analyses, new figures, design changes, IRB-dependent items
+   - Do NOT invoke other skills (`/make-figures`, `/analyze-stats`) during fix — text edits only
+3. **Report changes**: After all fixes, output a summary:
+   ```
+   ## Auto-Fix Summary
+   - Fixed: {N} issues
+   - Skipped (requires human): {M} issues
+   - Changes: {list of id + one-line description of what was changed}
+   ```
+4. **Re-review**: Run Phase 2 (systematic check) again on the modified manuscript.
+5. **Iterate**: If new fixable issues emerge, apply one more round (maximum 2 total fix iterations).
+6. **Final output**: Regenerate the Phase 3 report and Phase 3c JSON with updated scores.
+
+**Iteration limit**: Maximum 2 fix-and-re-review cycles. If the score has not reached "PASS" after 2 iterations, output the final report with remaining issues and flag: "Auto-fix limit reached. Remaining issues require human review."
 
 ## What This Skill Does NOT Do
 

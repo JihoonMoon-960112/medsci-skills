@@ -4,7 +4,7 @@ description: >
   General-purpose research orchestrator. Routes ambiguous or multi-step requests to the right skill(s)
   from the medsci-skills bundle. Use when the user describes a research goal without naming
   a specific skill, or when a task spans multiple skills.
-triggers: orchestrate, research help, what should I do next, where do I start, help me with my paper, run the pipeline, which skill
+triggers: orchestrate, research help, what should I do next, where do I start, help me with my paper, run the pipeline, which skill, end-to-end, e2e
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---
@@ -139,15 +139,44 @@ When running a multi-skill chain:
 
 ## Full Pipeline Mode
 
-When the user requests "run the full pipeline," "end-to-end," or similar, execute the complete research-to-manuscript chain without pausing for confirmation between skills. Only pause at built-in user gates within skills (e.g., write-paper outline approval).
+When the user requests "run the full pipeline," "end-to-end," or similar, execute the complete research-to-manuscript chain.
+
+### `--e2e` Flag
+
+When `--e2e` is passed (or the user says "end-to-end", "Arm A", or "fully autonomous"):
+1. Set `--e2e` mode ON.
+2. Pass `--autonomous` to `/write-paper` when invoking it.
+3. Pass `--json` to `/self-review` and `/check-reporting` when invoking them.
+4. Skip all orchestrator-level confirmations ("Shall I proceed?").
+5. DO still respect data-safety gates (PHI Safety Gate).
+6. After each skill completes, run post-skill validation (see below).
+
+Without `--e2e`, the existing behavior is preserved: announce plan, confirm before starting, pause between skills, and respect write-paper's built-in gates (outline approval, discussion planning).
 
 ### Standard Pipeline: Data → Manuscript
 
 1. `/analyze-stats` → tables (CSV), figures, `_analysis_outputs.md`
-2. `/make-figures` → reads `_analysis_outputs.md` → `figures/*.pdf`, `figures/*.png`, `figures/_figure_manifest.md`
-3. `/write-paper` → reads tables, figures, manifests → `manuscript.md`, `manuscript.pdf`, `manuscript.docx`
-4. `/check-reporting` → reads `manuscript.md` → compliance report
-5. `/self-review` → reads `manuscript.md` → review comments
+2. `/make-figures --study-type {type}` → reads `_analysis_outputs.md` → `figures/*.pdf`, `figures/*.png`, `figures/_figure_manifest.md`
+3. `/write-paper --autonomous` (if --e2e) → reads tables, figures, manifests → `manuscript.md`, `manuscript_final.docx`
+4. `/check-reporting` → reads `manuscript.md` → compliance report (called within write-paper Phase 7, but orchestrator verifies output)
+5. `/self-review --json` → reads `manuscript.md` → review report (called within write-paper Phase 7, but orchestrator verifies output)
+
+### Post-Skill Validation
+
+After each skill completes, verify that expected output files exist. If validation fails, report the error and do NOT proceed to the next skill.
+
+| Skill | Expected Outputs | Validation |
+|-------|-----------------|------------|
+| `/analyze-stats` | At least one file in `tables/*.csv` OR `_analysis_outputs.md` | Check file existence and non-empty |
+| `/make-figures` | `figures/_figure_manifest.md` with at least 1 entry | Parse manifest, verify listed files exist |
+| `/write-paper` | `manuscript.md` (required), `manuscript_final.docx` (required in --e2e) | Check file existence and non-empty |
+| `/check-reporting` | `reporting_checklist.md` or inline report | Check file existence |
+| `/self-review` | Review report with JSON block (when --json) | Check JSON block is parseable |
+
+**On validation failure:**
+- Log the failure: which skill, which output was missing, any error messages.
+- In `--e2e` mode: report the error in `_pipeline_log.md` and STOP. Do not proceed to the next skill. Output: "Pipeline halted at {skill}: {missing output}. Check the skill's output and re-run."
+- In interactive mode: report the error and ask the user how to proceed.
 
 ### Data Flow Contract
 
@@ -157,16 +186,16 @@ When the user requests "run the full pipeline," "end-to-end," or similar, execut
 | fulltext-retrieval | DOI list (CSV/text) | `pdfs/*.pdf`, retrieval report |
 | analyze-stats | raw data (CSV/Excel) | tables/*.csv, figures/*, `_analysis_outputs.md` |
 | make-figures | `_analysis_outputs.md`, data files | figures/*.pdf, figures/*.png, `_figure_manifest.md` |
-| write-paper | figures/, tables/, manifests, journal profile | manuscript.md, manuscript.pdf, manuscript.docx |
+| write-paper | figures/, tables/, manifests, journal profile | manuscript.md, manuscript_final.docx, manuscript_final.pdf |
 | check-reporting | manuscript.md | reporting_checklist.md |
-| self-review | manuscript.md | review_comments.md |
+| self-review | manuscript.md | review_comments.md (with JSON block) |
 
 ### Rules
-1. After each skill completes, read its output manifest to discover outputs.
+1. After each skill completes, run post-skill validation before proceeding.
 2. Pass discovered file paths as context to the next skill.
-3. Do NOT ask "shall I proceed?" between skills — proceed automatically.
-4. DO pause at write-paper's built-in gates (outline approval, discussion planning).
-5. If a skill fails, report the error and ask the user how to proceed.
+3. In `--e2e` mode: do NOT ask "shall I proceed?" between skills — proceed automatically after validation passes.
+4. Without `--e2e`: pause at write-paper's built-in gates (outline approval, discussion planning) and confirm between skills.
+5. If a skill fails or validation fails, report the error. In `--e2e` mode, halt the pipeline.
 
 ---
 
