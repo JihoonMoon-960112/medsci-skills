@@ -9,7 +9,7 @@
 ![Platform](https://img.shields.io/badge/Platform-Claude_Code-blueviolet?style=flat-square)
 ![Built by](https://img.shields.io/badge/Built_by-Physician--Researcher-blue?style=flat-square)
 
-![Medical Research Skills](assets/social-preview.png)
+![MedSci Skills](assets/social-preview.png)
 
 *Literature Search &rarr; Full-Text Retrieval &rarr; Study Design &rarr; Sample Size &rarr; Protocol &rarr; De-identification &rarr; Data Cleaning &rarr; Statistics &rarr; Figures &rarr; Writing &rarr; Compliance &rarr; Journal Selection &rarr; Revision &rarr; Presentation*
 
