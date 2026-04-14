@@ -275,7 +275,41 @@ Study type: {study type or "custom"}
 
 This manifest is consumed by `/write-paper` Phase 2 (figure embedding) and Phase 7 (DOCX build). It **MUST** exist after figure generation completes. Verify the file is non-empty before finishing.
 
-**Flow diagram generation rule:** STARD/CONSORT/PRISMA flow diagrams **MUST** use D2 (`d2 --layout elk`) as the default tool. Check for D2 availability with `which d2`. If D2 is installed, generate the `.d2` source file and render to SVG. If D2 is NOT available, fall back in this order: (1) attempt `brew install d2`, (2) use Mermaid if available, (3) generate a markdown text-based flow diagram and flag in the manifest with `Tool: markdown-fallback`. Do NOT use matplotlib FancyBboxPatch for flow diagrams — the absolute coordinate approach breaks when text changes.
+**Flow diagram generation rule:** STARD/CONSORT/PRISMA flow diagrams **MUST** use D2 (`d2 --layout elk`) as the default tool. Check for D2 availability with `which d2`. If D2 is installed, generate the `.d2` source file and render to PNG using the compact workflow below. If D2 is NOT available, fall back in this order: (1) attempt `brew install d2`, (2) use Mermaid if available, (3) generate a markdown text-based flow diagram and flag in the manifest with `Tool: markdown-fallback`. Do NOT use matplotlib FancyBboxPatch for flow diagrams — matplotlib patches break when embedded in DOCX (box distortion) and use absolute coordinates that break when text changes.
+
+**D2 compact flow diagram recipe (mandatory for all flow diagrams):**
+
+D2's default spacing is designed for software diagrams and produces overly spaced layouts for publication figures. Apply these three steps:
+
+1. **Large font sizes** — Use `font-size: 20-24` for main boxes, `18` for side/exclusion boxes, `17-18` for italic notes. This makes text readable after the resize step.
+2. **Minimal padding** — Use `--pad 20` (default is 100).
+3. **Post-process: resize + vertical compression** — D2 has no native gap control, so compress programmatically:
+
+```bash
+# Step 1: D2 → raw PNG at 2x scale
+d2 --layout elk --theme 0 --pad 20 flow.d2 /tmp/raw.png --scale 2
+
+# Step 2: Resize to column width + 85% vertical compression
+python3 -c "
+from PIL import Image
+im = Image.open('/tmp/raw.png')
+TARGET_W = 2100  # 7 inches at 300 DPI (double column)
+scale = TARGET_W / im.width
+new_h = int(im.height * scale * 0.85)  # 85% vertical compression
+im.resize((TARGET_W, new_h), Image.LANCZOS).save('figures/fig1_flow.png')
+"
+
+# Step 3: Also generate PDF (vector, for journal submission)
+d2 --layout elk --theme 0 --pad 20 flow.d2 figures/fig1_flow.pdf
+```
+
+**D2 style conventions for flow diagrams:**
+- Main boxes: `font-size: 22; bold: true; fill: white or #E3F2FD/#E8F0FE; stroke: black`
+- Exclusion/side boxes: `font-size: 18; fill: #F5F5F5; stroke: #888888`
+- Outcome/group boxes: `font-size: 20; fill: #FFF8E1 or #D4E8D4`
+- Italic filter text: `shape: text; font-size: 18; italic: true`
+- Footer text: `shape: text; font-size: 17`
+- Key cohort boxes: `stroke-width: 2` for visual emphasis
 
 ---
 
@@ -310,15 +344,11 @@ downstream positions.
 |------|-----------------|-----|
 | PRISMA Flow | **PRISMA 2020 Shiny App** (estech.shinyapps.io/prisma_flowdiagram/) | Enter numbers → auto-generate compliant diagram |
 | CONSORT Diagram | **CONSORT2025 Shiny/R App** | Auto-generates CONSORT 2025 compliant flow |
-| STARD Diagram | **D2** (`d2 --layout elk`) → SVG → Figma polish | Auto-layout with customizable styling |
-| Pipeline Diagram | **D2** → SVG → optional Figma polish | Code-based + auto-layout + version control |
+| STARD Diagram | **D2** (`d2 --layout elk`) → PNG (compact recipe) | Auto-layout, DOCX-safe raster output |
+| Pipeline Diagram | **D2** → PNG (compact recipe) | Code-based + auto-layout + version control |
+| Generic Study Flow | **D2** → PNG (compact recipe) | CONSORT/STROBE-style participant flow |
 
-**D2 workflow for flow diagrams:**
-```bash
-# Install: brew install d2
-# Render: d2 --layout elk --theme 0 diagram.d2 output.svg
-# Then open SVG in Figma for final polish (grid alignment, font swap, color adjustment)
-```
+**D2 workflow for flow diagrams:** See the "D2 compact flow diagram recipe" above in the Flow diagram generation rule. Key points: font-size 20-24, `--pad 20`, resize to 2100px width with 85% vertical compression. No Figma step needed.
 
 ### Visual / Graphical Abstracts → python-pptx Template Generator
 
@@ -333,9 +363,9 @@ See the Visual Abstract section above for the full workflow.
 ### Hybrid Workflow (recommended for publication)
 
 ```
-Data plots: matplotlib → PDF (this skill)
-Flow diagrams: D2 → SVG → Figma → PDF
-Final assembly: Figma or Inkscape (multi-panel)
+Data plots: matplotlib/seaborn → PDF + PNG (this skill)
+Flow diagrams: D2 → PNG (compact recipe) + PDF
+Final assembly: pandoc or python-docx (auto-embedded in DOCX)
 ```
 
 ---
