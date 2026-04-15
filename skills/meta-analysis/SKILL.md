@@ -68,7 +68,7 @@ Auto-detect type from the research question or accept user specification.
    - Exclusion criteria with justification
 
 3. **Plan the search**:
-   - Minimum 2 databases (PubMed, Embase recommended; add Scopus, Web of Science, Cochrane as needed)
+   - Minimum 3 databases: PubMed, Embase, and Cochrane CENTRAL (add Scopus, Web of Science as needed)
    - Draft Boolean search strategy using PIRD/PICO components
    - Grey literature plan (conference abstracts, trial registries)
    - Language restrictions (state explicitly)
@@ -214,6 +214,8 @@ Document the extraction strategy in the data extraction form Notes column.
 
 When comparing extraction results between independent reviewers (minimum 2), check:
 
+0. **Inter-reviewer agreement**: Calculate and report screening agreement: % agreement or Cohen's kappa at title/abstract and full-text stages. If kappa was not calculated, report the exact number of discrepant records and the resolution method.
+
 1. **Denominator consistency**: Verify sample sizes match between reviewers.
    Watch for per-patient vs per-lesion/per-tumor unit confusion.
    **CRITICAL**: The denominator may differ across outcomes within the same study
@@ -332,6 +334,7 @@ Key points:
 - Single-arm uses `metaprop()` with logit transformation + Clopper-Pearson CI
 - GRADE certainty lower for single-arm -- state explicitly
 - Report both in Results: label PRIMARY/SECONDARY per pre-specified assignment
+- **Selection bias warning**: Single-arm case series may introduce selection bias (experienced centres, favourable patients). When pooling with comparative arms, report both pooled estimates separately and discuss any numerically lower event rate in single-arm studies as a potential selection effect.
 
 #### Practical R Notes:
 - Use `method = "Inverse"` not `"MH"` to avoid method.tau conflict

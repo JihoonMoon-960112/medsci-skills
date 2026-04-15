@@ -424,6 +424,9 @@ This is an optional post-pipeline step. Do NOT generate automatically — only w
 7. **AI disclosure** (if applicable): Specific AI tools used and human oversight statement.
 8. **Suggested reviewers**: Name, affiliation, email, expertise area (2-3 minimum).
 9. **Excluded reviewers** (if any): Name and reason.
+
+**Reviewer COI cross-check (mandatory for meta-analyses):**
+Cross-check all suggested and excluded reviewers against the included-study author list and their co-authors. Same-institution authors of included studies constitute automatic COI and must be excluded from reviewer suggestions.
 10. **Closing**: Corresponding author name and credentials.
 
 **Anti-overclaiming guard:**

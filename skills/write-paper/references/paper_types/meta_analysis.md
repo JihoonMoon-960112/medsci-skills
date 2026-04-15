@@ -27,7 +27,7 @@ Before writing, confirm:
 Background: [One sentence: why this systematic review is needed]
 Purpose: [PICO: Population, Intervention/Index test, Comparator, Outcome]
 Methods: [Databases searched, dates, study design, quality tool]
-Results: [N studies, N patients, pooled estimate with 95% CI, I²]
+Results: [N studies, N patients, pooled estimate with 95% CI, 95% PI when I² > 50%, I²]
 Conclusion: [Main finding, certainty of evidence]
 ```
 
@@ -71,7 +71,7 @@ List all databases with dates. Provide full search string for at least one datab
 **Exclusion criteria:** [List explicitly, not just "did not meet inclusion criteria"]
 
 ### 2.4 Study Selection
-"Two reviewers (initials) independently screened titles/abstracts, then full texts. Disagreements were resolved by consensus or a third reviewer (initials). The screening process is summarized in the PRISMA 2020 flow diagram (Figure 1)."
+"Two reviewers (initials) independently screened titles/abstracts, then full texts. Inter-reviewer agreement was [% agreement / Cohen's kappa = X.XX] at the title/abstract stage and [% agreement / Cohen's kappa = X.XX] at the full-text stage. [N] discrepancies were resolved by consensus or a third reviewer (initials). The screening process is summarized in the PRISMA 2020 flow diagram (Figure 1)."
 
 ### 2.5 Data Extraction
 "Two reviewers independently extracted data using a standardized form. The following variables were extracted: [list 8–15 variables]. Disagreements were resolved by discussion."
@@ -161,6 +161,8 @@ If ≥10 studies: "Egger's test showed [evidence/no evidence] of funnel plot asy
 | Table 1 | Study characteristics |
 | Table 2 | Quality assessment results |
 | Suppl. Table 1 | Full search strategy (all databases) |
+| Table 3 (or next) | GRADE Summary of Findings table |
+| Table 4 (or next) | Per-study risk of bias table (NOS domain scores for comparative; JBI item scores for single-arm) |
 | Suppl. Table 2 | Excluded studies with reasons |
 
 ---
