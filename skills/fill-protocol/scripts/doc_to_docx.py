@@ -17,13 +17,36 @@ SOFFICE_CANDIDATES = [
 ]
 
 
+def _platform_install_hint() -> str:
+    """Return platform-specific install instructions for LibreOffice."""
+    import platform
+    sys_name = platform.system()
+    skill_root = Path(__file__).resolve().parent.parent
+    setup = skill_root / "setup.sh"
+    lines = ["LibreOffice (soffice) not found.",
+             "Required only for legacy .doc → .docx conversion.",
+             "(.docx templates work without it.)",
+             "",
+             "Install:"]
+    if sys_name == "Darwin":
+        lines.append("  brew install --cask libreoffice")
+    elif sys_name == "Linux":
+        lines.append("  sudo apt-get install -y libreoffice          # Debian/Ubuntu")
+        lines.append("  sudo dnf install -y libreoffice              # Fedora")
+        lines.append("  sudo pacman -S --needed libreoffice-fresh    # Arch")
+    else:
+        lines.append("  See https://www.libreoffice.org/download/")
+    lines.append("")
+    lines.append("Or run the bundled setup script:")
+    lines.append(f"  bash {setup} install")
+    return "\n".join(lines)
+
+
 def find_soffice() -> str:
     for path in SOFFICE_CANDIDATES:
         if shutil.which(path) or Path(path).exists():
             return path
-    raise FileNotFoundError(
-        "LibreOffice (soffice) not found. Install with: brew install --cask libreoffice"
-    )
+    raise FileNotFoundError(_platform_install_hint())
 
 
 def convert(input_path: Path, output: Path) -> Path:

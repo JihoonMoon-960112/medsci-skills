@@ -43,14 +43,45 @@ skill enforces that pattern.
 
 ## Dependencies
 
-```bash
-# .doc → .docx conversion (large download but mandatory for legacy templates)
-brew install --cask libreoffice    # macOS
-# or:  apt-get install libreoffice  # Debian/Ubuntu
+If the template is already `.docx`, **LibreOffice is not required** — only the
+three Python packages below. LibreOffice is needed only when the template is a
+legacy `.doc` and must be converted first.
 
-# Python libraries
+```bash
+# Python libraries (always required)
 pip install --user docxtpl python-docx pyyaml
+
+# LibreOffice (only for legacy .doc input; ~700 MB on macOS)
+brew install --cask libreoffice              # macOS
+sudo apt-get install -y libreoffice           # Debian/Ubuntu
+sudo dnf install -y libreoffice               # Fedora
+sudo pacman -S --needed libreoffice-fresh     # Arch
 ```
+
+### Bundled setup script
+
+The skill ships a `setup.sh` that detects what is missing and installs only
+those parts, with a confirmation prompt before each step:
+
+```bash
+bash setup.sh check     # report what's installed (read-only)
+bash setup.sh install   # install missing pieces (asks before each)
+```
+
+### Auto-install behavior (for Claude as the caller)
+
+When invoking this skill on behalf of a user:
+
+1. **Before calling `doc_to_docx.py`**, run `bash setup.sh check`. If
+   LibreOffice is missing, **ask the user** before installing — the cask is
+   ~700 MB and proceeding silently is unfriendly.
+2. **Skip LibreOffice entirely** if the template is already `.docx`. Only
+   surface the install prompt when a `.doc` is encountered.
+3. **Never** pass `--yes` to `setup.sh install` unless the user has explicitly
+   authorized unattended installation in this session.
+4. If the user declines installation, fall back to asking them to convert
+   the `.doc` manually (open in Word/LibreOffice/Pages → Save As → .docx) and
+   then re-run with the converted file.
 
 ## Workflow
 
