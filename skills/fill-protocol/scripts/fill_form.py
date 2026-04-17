@@ -185,7 +185,8 @@ class FormFiller:
     def __init__(self, template_path: str | Path,
                  korean_font: str = DEFAULT_KOREAN_FONT,
                  blank_between_paragraphs: bool = True,
-                 blank_around_section_header: bool = True):
+                 blank_around_section_header: bool = True,
+                 blank_around_all_section_headers: bool = False):
         self.path = Path(template_path).expanduser().resolve()
         if not self.path.exists():
             raise FileNotFoundError(self.path)
@@ -193,6 +194,7 @@ class FormFiller:
         self.korean_font = korean_font
         self.blank_between_paragraphs = blank_between_paragraphs
         self.blank_around_section_header = blank_around_section_header
+        self.blank_around_all_section_headers = blank_around_all_section_headers
         self._filled_rows: set[int] = set()
         self._table_results = FillResult()
         self._paragraph_results = FillResult()
@@ -396,6 +398,57 @@ class FormFiller:
         self._paragraph_results.unmatched.append(f"<para>{matcher}")
         return False
 
+    # ---- Document-wide passes ----
+
+    def apply_blank_around_all_section_headers(self) -> int:
+        """Scan all top-level paragraphs and add blank lines above and below
+        every numbered section header (e.g. '1. ', '12. ').
+
+        OPT-IN ONLY. Use this when the institutional review will tolerate
+        layout drift (page count change). For strict form-fidelity submissions,
+        leave disabled (default) and rely on per-section blanks added during
+        replace_paragraphs_after().
+
+        Skips:
+        - Headers whose previous sibling is already an empty paragraph
+          (avoids double-blanks when section was filled via section_replace)
+        - Headers whose next sibling is already an empty paragraph
+        - Paragraphs inside tables (only top-level body paragraphs scanned)
+
+        Returns the number of blank paragraphs inserted.
+        """
+        header_re = re.compile(r"^\s*\d+\.\s+\S")
+        body = self.doc.element.body
+        # Collect all top-level <w:p> elements (skip those inside <w:tbl>)
+        all_top_ps = [el for el in body if el.tag == qn("w:p")]
+        inserted = 0
+
+        def is_blank(p_elem) -> bool:
+            if p_elem is None or p_elem.tag != qn("w:p"):
+                return False
+            # Empty if no <w:t> with text content
+            for t in p_elem.iter(qn("w:t")):
+                if t.text and t.text.strip():
+                    return False
+            return True
+
+        def text_of(p_elem) -> str:
+            return "".join(t.text or "" for t in p_elem.iter(qn("w:t")))
+
+        for p_elem in all_top_ps:
+            text = text_of(p_elem)
+            if not header_re.match(text):
+                continue
+            prev = p_elem.getprevious()
+            nxt = p_elem.getnext()
+            if not is_blank(prev):
+                p_elem.addprevious(_make_blank_paragraph())
+                inserted += 1
+            if not is_blank(nxt):
+                p_elem.addnext(_make_blank_paragraph())
+                inserted += 1
+        return inserted
+
     # ---- Validation & save ----
 
     def validate(self) -> list[str]:
@@ -433,9 +486,11 @@ def fill_from_yaml(template: Path, content_yaml: Path, output: Path) -> None:
     korean_font = protections.get("korean_font", DEFAULT_KOREAN_FONT)
     blank_between = protections.get("blank_between_paragraphs", True)
     blank_around = protections.get("blank_around_section_header", True)
+    blank_around_all = protections.get("blank_around_all_section_headers", False)
     filler = FormFiller(template, korean_font=korean_font,
                          blank_between_paragraphs=blank_between,
-                         blank_around_section_header=blank_around)
+                         blank_around_section_header=blank_around,
+                         blank_around_all_section_headers=blank_around_all)
 
     # Fill table key-value pairs
     for label, value in (cfg.get("table_kv") or {}).items():
@@ -455,6 +510,11 @@ def fill_from_yaml(template: Path, content_yaml: Path, output: Path) -> None:
                                                 mode="startswith")
         status = "OK " if ok else "MISS"
         print(f"  [{status}] paragraph: {matcher!r}")
+
+    # Document-wide pass: blank lines around ALL numbered section headers
+    if blank_around_all:
+        n = filler.apply_blank_around_all_section_headers()
+        print(f"  [OK ] blank lines around all numbered headers: {n} inserted")
 
     print()
     print(filler.report())
