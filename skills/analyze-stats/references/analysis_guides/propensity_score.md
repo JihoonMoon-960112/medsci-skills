@@ -50,7 +50,17 @@ Comparing PSM and IPTW results directly is inappropriate — they estimate diffe
 - All subjects included (no exclusion)
 - Flag extreme weights > 10
 
-**Option C — Overlap Weighting (Recommended for most cases)**
+**Option C — SIPTW (Stabilized Inverse Probability of Treatment Weighting)**
+- Weights: treated = P(T=1)/PS, control = P(T=0)/(1-PS)
+- Mathematically equivalent to stabilized IPTW (Option B with stabilized=True)
+- Named explicitly as SIPTW in emulated target trial literature
+- Maintains entire cohort sample size (no exclusion)
+- Allows appropriate variance estimation of main effect
+- Estimand: ATE
+- Increasingly used in large-scale NHIS cohort studies
+- Report effective sample size (ESS) alongside raw N
+
+**Option D — Overlap Weighting (Recommended for most cases)**
 - Weights: treated = (1-PS), control = PS
 - Naturally down-weights subjects at PS extremes
 - No extreme weight problem (advantage over IPTW)
@@ -90,6 +100,8 @@ Comparing PSM and IPTW results directly is inappropriate — they estimate diffe
 **PSM**: "Propensity scores were estimated using logistic regression with the following covariates: [list]. PS matching was performed using 1:1 nearest-neighbor matching with a caliper of 0.2 SD of the logit PS. After matching, all SMDs were below 0.10 (Figure X). In the matched cohort (n = X pairs), ..."
 
 **IPTW/OW**: "Inverse probability of treatment weighting (or overlap weighting) was applied using stabilized weights. Covariate balance was assessed using SMDs (all < 0.10; Figure X). The weighted analysis showed ..."
+
+**SIPTW**: "Stabilized inverse probability of treatment weighting was used to balance covariate distributions between the [exposed] and [unexposed] groups. This approach maintains the sample size of the entire cohort and allows for appropriate estimation of the variance of the main effect. Covariate balance was assessed using SMDs (all < 0.10; Figure X)."
 
 ---
 

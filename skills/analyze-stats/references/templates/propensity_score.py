@@ -63,7 +63,7 @@ CONFIG = {
     "covariates": ["age", "sex", "bmi", "comorbidity_score"],
     "categorical_covariates": ["sex"],
 
-    # PS method: "matching", "iptw", "overlap"
+    # PS method: "matching", "iptw", "siptw", "overlap"
     "ps_method": "matching",
 
     # Matching options
@@ -261,6 +261,42 @@ def iptw_weights(ps, treatment, stabilized=True, truncation=10.0):
     return w
 
 
+def siptw_weights(ps, treatment, truncation=10.0):
+    """Calculate Stabilized Inverse Probability of Treatment Weights (SIPTW).
+
+    SIPTW maintains the sample size of the entire cohort and allows for
+    appropriate estimation of the variance of the main effect. Increasingly
+    used in emulated target trial frameworks (Yon DK group pattern).
+
+    Weights:
+        Treated:   P(T=1) / PS
+        Control:   P(T=0) / (1 - PS)
+
+    This is equivalent to stabilized IPTW but explicitly named SIPTW in some
+    literature to distinguish from unstabilized IPTW.
+    """
+    p_treat = treatment.mean()
+    w = np.where(treatment == 1, p_treat / ps, (1 - p_treat) / (1 - ps))
+
+    # Truncation
+    n_truncated = (w > truncation).sum()
+    if n_truncated > 0:
+        print(f"  Truncated {n_truncated} weights > {truncation}")
+        w = np.clip(w, None, truncation)
+
+    # Effective sample size
+    ess_treated = (w[treatment == 1].sum()) ** 2 / (w[treatment == 1] ** 2).sum()
+    ess_control = (w[treatment == 0].sum()) ** 2 / (w[treatment == 0] ** 2).sum()
+
+    print(f"\nSIPTW Weights Summary:")
+    print(f"  Mean: {w.mean():.2f}, SD: {w.std():.2f}")
+    print(f"  Min: {w.min():.2f}, Max: {w.max():.2f}")
+    print(f"  Effective sample size (treated): {ess_treated:.0f} / {(treatment == 1).sum()}")
+    print(f"  Effective sample size (control): {ess_control:.0f} / {(treatment == 0).sum()}")
+
+    return w
+
+
 def overlap_weights(ps, treatment):
     """Calculate overlap weights (ATO)."""
     w = np.where(treatment == 1, 1 - ps, ps)
@@ -372,6 +408,15 @@ def main():
         print(f"\n--- Step 2: IPTW ---")
         weights = iptw_weights(ps, treatment,
                                 stabilized=config["stabilized_weights"],
+                                truncation=config["weight_truncation"])
+        df["weights"] = weights
+        bal_combined = balance_table(df, treatment_col, covariates,
+                                     config.get("categorical_covariates", []),
+                                     weights=weights)
+
+    elif config["ps_method"] == "siptw":
+        print(f"\n--- Step 2: SIPTW (Stabilized Inverse Probability of Treatment Weighting) ---")
+        weights = siptw_weights(ps, treatment,
                                 truncation=config["weight_truncation"])
         df["weights"] = weights
         bal_combined = balance_table(df, treatment_col, covariates,

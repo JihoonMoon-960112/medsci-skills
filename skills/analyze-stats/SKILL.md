@@ -1,7 +1,7 @@
 ---
 name: analyze-stats
 description: Statistical analysis for medical research papers. Generates reproducible Python/R code with publication-ready tables and figures. Supports diagnostic accuracy, inter-rater agreement, meta-analysis, survival analysis, survey data, group comparisons, regression, propensity score, and repeated measures.
-triggers: statistics, statistical analysis, analyze data, run stats, table 1, demographics table, ROC curve, agreement analysis, ICC, kappa, survival analysis, Kaplan-Meier, group comparison, logistic regression, linear regression, regression, propensity score, PSM, IPTW, overlap weighting, repeated measures, mixed model, GEE, longitudinal
+triggers: statistics, statistical analysis, analyze data, run stats, table 1, demographics table, ROC curve, agreement analysis, ICC, kappa, survival analysis, Kaplan-Meier, group comparison, logistic regression, linear regression, regression, propensity score, PSM, IPTW, SIPTW, overlap weighting, repeated measures, mixed model, GEE, longitudinal, survey weighted, KNHANES, NHANES, NHIS cohort, complex survey, wOR, weighted odds ratio, claims-based, ICD-10
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 ---
@@ -79,10 +79,12 @@ Present the plan and **wait for user approval** before executing.
 | Logistic Regression | Binary outcome + predictors | statsmodels, sklearn | -- | OR table, C-statistic, forest plot |
 | Linear Regression | Continuous outcome + predictors | statsmodels | -- | Coefficient table, R², diagnostic plots |
 | Propensity Score | Observational treatment comparison | sklearn, statsmodels | MatchIt, WeightIt, cobalt | Balance table, Love plot, weighted analysis |
+| Survey-Weighted | Complex survey data (KNHANES, NHANES, KCHS) | statsmodels | survey, tableone, gWQS | Weighted Table 1, wOR table, subgroup results |
 | Repeated Measures | Longitudinal / multi-timepoint data | pingouin, statsmodels | lme4, nlme, geepack | Spaghetti plot, LMM/GEE/RM ANOVA results |
 
-For **Logistic Regression**, **Linear Regression**, **Propensity Score**, and **Repeated Measures**:
+For **Logistic Regression**, **Linear Regression**, **Propensity Score**, **Survey-Weighted**, and **Repeated Measures**:
 load the corresponding guide from `${CLAUDE_SKILL_DIR}/references/analysis_guides/` before generating code.
+For **Survey-Weighted** analysis, also load `survey_weighted.md`. For NHIS claims-based studies, load `nhis_icd10_mapping.md`.
 For test selection guidance, load `${CLAUDE_SKILL_DIR}/references/analysis_guides/test_selection.md`.
 
 ### Phase 3: Execute
@@ -421,12 +423,35 @@ When death or other events preclude the outcome of interest, standard KM overest
 - **Guide**: Load `analysis_guides/propensity_score.md` before generating code
 - **Template**: `references/templates/propensity_score.py`
 - Step 1: PS estimation (logistic regression)
-- Step 2: Apply method (matching with caliper = 0.2 × SD logit PS, IPTW with stabilized weights, or overlap weighting)
+- Step 2: Apply method (matching with caliper = 0.2 × SD logit PS, IPTW/SIPTW with stabilized weights, or overlap weighting)
 - Step 3: Balance assessment — SMD < 0.10 for all covariates, Love plot mandatory
 - Step 4: Weighted/matched outcome analysis with robust SE
 - Step 5: Sensitivity analysis (E-value for unmeasured confounding)
 - Always state the estimand (ATE/ATT/ATO) explicitly
 - Recommend overlap weighting as default (no extreme weight issues)
+- **SIPTW**: Stabilized IPTW variant used in emulated target trial frameworks; report effective sample size
+
+### Survey-Weighted Analysis
+
+- **Guide**: Load `analysis_guides/survey_weighted.md` before generating code
+- **Template**: `references/templates/survey_weighted_analysis.py`
+- For KNHANES/NHANES/KCHS and similar complex survey designs
+- Always declare survey design (strata, cluster/PSU, weight) before analysis
+- Use correct weight variable (interview vs exam vs nutrition)
+- R `survey` package strongly recommended over Python for publication
+- Sequential model building: Model 1 (age+sex) → Model 2 (full adjustment)
+- Report weighted odds ratios (wOR) with 95% CI
+- Cross-national: analyze each country separately, never pool
+- Subgroup analysis: exclude the stratification variable from covariates
+
+### NHIS Claims-Based Studies
+
+- **Guide**: Load `analysis_guides/nhis_icd10_mapping.md` for disease definition patterns
+- Claims-based algorithms: N-claim rule, claim+medication, look-back period
+- Always specify ICD-10 code ranges, claim count requirement, and time windows
+- Charlson comorbidity index: cite Quan 2005 adaptation
+- Anchor covariates to most recent data prior to index date
+- Sensitivity analysis: test stricter/looser disease definitions
 
 ### Repeated Measures
 
