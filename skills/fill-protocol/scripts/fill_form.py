@@ -186,7 +186,8 @@ class FormFiller:
                  korean_font: str = DEFAULT_KOREAN_FONT,
                  blank_between_paragraphs: bool = True,
                  blank_around_section_header: bool = True,
-                 blank_around_all_section_headers: bool = False):
+                 blank_around_all_section_headers: bool = False,
+                 normalize_page_breaks: bool = True):
         self.path = Path(template_path).expanduser().resolve()
         if not self.path.exists():
             raise FileNotFoundError(self.path)
@@ -195,6 +196,7 @@ class FormFiller:
         self.blank_between_paragraphs = blank_between_paragraphs
         self.blank_around_section_header = blank_around_section_header
         self.blank_around_all_section_headers = blank_around_all_section_headers
+        self.normalize_page_breaks_flag = normalize_page_breaks
         self._filled_rows: set[int] = set()
         self._table_results = FillResult()
         self._paragraph_results = FillResult()
@@ -469,7 +471,72 @@ class FormFiller:
             f"Missed: {n_table_miss} cells, {n_para_miss} sections."
         )
 
+    def normalize_page_breaks(self) -> int:
+        """Remove dangling empty paragraphs whose sole content is a page break,
+        and transfer the break to the next content paragraph via pageBreakBefore.
+
+        Why: templates often place `<w:p><w:r><w:br w:type="page"/></w:r></w:p>`
+        after a table or section header to force the next block onto a new page.
+        When the preceding content's height varies (e.g. an abstract table grows
+        with content), the empty paragraph can spill onto a page by itself and
+        the page break then forces the next block one more page forward —
+        producing a visibly blank page.
+
+        Replacing this pattern with `<w:pageBreakBefore/>` on the next content
+        paragraph's `pPr` preserves the "start on a new page" intent regardless
+        of where the preceding content ends, eliminating the blank page.
+
+        Returns the number of paragraphs normalized.
+        """
+        from copy import deepcopy  # noqa: F401 (kept for parity with other helpers)
+
+        body = self.doc.element.body
+        children = list(body)
+        fixed = 0
+
+        for i, el in enumerate(children):
+            if not el.tag.endswith("}p"):
+                continue
+            # Only collapse paragraphs with NO real text, containing a page break
+            text = "".join((t.text or "") for t in el.iter(qn("w:t")))
+            if text.strip():
+                continue
+            page_brs = [b for b in el.iter(qn("w:br"))
+                        if b.get(qn("w:type")) == "page"]
+            if not page_brs:
+                continue
+            # Find the next sibling content paragraph (non-empty p or table)
+            target = None
+            for j in range(i + 1, len(children)):
+                sib = children[j]
+                if sib.tag.endswith("}p"):
+                    sib_text = "".join((t.text or "") for t in sib.iter(qn("w:t")))
+                    if sib_text.strip():
+                        target = sib
+                        break
+                elif sib.tag.endswith("}tbl"):
+                    # A table has no pPr; leave the break alone.
+                    target = None
+                    break
+            if target is None:
+                continue
+            # Attach pageBreakBefore to target's pPr (idempotent)
+            pPr = target.find(qn("w:pPr"))
+            if pPr is None:
+                pPr = OxmlElement("w:pPr")
+                target.insert(0, pPr)
+            if pPr.find(qn("w:pageBreakBefore")) is None:
+                pbb = OxmlElement("w:pageBreakBefore")
+                pPr.insert(0, pbb)
+            # Remove the dangling empty paragraph
+            el.getparent().remove(el)
+            fixed += 1
+
+        return fixed
+
     def save(self, output_path: str | Path) -> Path:
+        if self.normalize_page_breaks_flag:
+            self.normalize_page_breaks()
         out = Path(output_path).expanduser().resolve()
         out.parent.mkdir(parents=True, exist_ok=True)
         self.doc.save(str(out))
@@ -487,10 +554,12 @@ def fill_from_yaml(template: Path, content_yaml: Path, output: Path) -> None:
     blank_between = protections.get("blank_between_paragraphs", True)
     blank_around = protections.get("blank_around_section_header", True)
     blank_around_all = protections.get("blank_around_all_section_headers", False)
+    normalize_pb = protections.get("normalize_page_breaks", True)
     filler = FormFiller(template, korean_font=korean_font,
                          blank_between_paragraphs=blank_between,
                          blank_around_section_header=blank_around,
-                         blank_around_all_section_headers=blank_around_all)
+                         blank_around_all_section_headers=blank_around_all,
+                         normalize_page_breaks=normalize_pb)
 
     # Fill table key-value pairs
     for label, value in (cfg.get("table_kv") or {}).items():

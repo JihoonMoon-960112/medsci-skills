@@ -146,6 +146,7 @@ one body-text line — never inflates the document's apparent line spacing.
 | `blank_between_paragraphs` | `true` | Inserts a blank line between every `\n\n`-split chunk inside `section_replace` | Disable only for forms where every line must be packed tight |
 | `blank_around_section_header` | `true` | Wraps each header that you `section_replace` with a blank above and a blank below | Disable when the template style already adds visual gaps via `space_before/after` |
 | `blank_around_all_section_headers` | `false` | After all fills, scans every numbered header (`\d+\.\s+`) — including ones you didn't replace — and adds blank lines around them | Enable when uniform readability matters more than form fidelity. **Default off because IRB / public-document submissions favor template fidelity over visual consistency** (page count stability, boilerplate untouched, reviewer-expected layout) |
+| `normalize_page_breaks` | `true` | On save, converts dangling empty paragraphs whose sole content is `<w:br w:type="page"/>` into a `<w:pageBreakBefore/>` attribute on the next content paragraph. Prevents visible blank pages when the preceding content (e.g. an abstract table) grows or shrinks and pushes the empty paragraph onto a page of its own, causing the break to land one page later. | Disable only if your template intentionally relies on the empty-paragraph-as-separator pattern for spacing |
 
 The third option exists because `section_replace` only touches sections you
 list in the YAML. If a template has 18 numbered sections and you only fill 12,
