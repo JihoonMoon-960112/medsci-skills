@@ -164,12 +164,14 @@ class FillResult:
 
 class FormFiller:
     def __init__(self, template_path: str | Path,
-                 korean_font: str = DEFAULT_KOREAN_FONT):
+                 korean_font: str = DEFAULT_KOREAN_FONT,
+                 blank_between_paragraphs: bool = True):
         self.path = Path(template_path).expanduser().resolve()
         if not self.path.exists():
             raise FileNotFoundError(self.path)
         self.doc = Document(str(self.path))
         self.korean_font = korean_font
+        self.blank_between_paragraphs = blank_between_paragraphs
         self._filled_rows: set[int] = set()
         self._table_results = FillResult()
         self._paragraph_results = FillResult()
@@ -263,7 +265,12 @@ class FormFiller:
             template_rPr = template_r.find(qn("w:rPr")) if template_r is not None else None
 
             insert_after = template_p
-            for chunk in new_content.split("\n\n"):
+            chunks = new_content.split("\n\n")
+            for ci, chunk in enumerate(chunks):
+                if ci > 0 and self.blank_between_paragraphs:
+                    blank_p = OxmlElement("w:p")
+                    insert_after.addnext(blank_p)
+                    insert_after = blank_p
                 new_p = OxmlElement("w:p")
                 # New paragraph should NOT have header style — use default (no pPr)
                 new_r = OxmlElement("w:r")
@@ -300,6 +307,10 @@ class FormFiller:
 
         insert_after = first_target_elem
         for chunk in chunks[1:]:
+            if self.blank_between_paragraphs:
+                blank_p = OxmlElement("w:p")
+                insert_after.addnext(blank_p)
+                insert_after = blank_p
             new_p = OxmlElement("w:p")
             if first_pPr is not None:
                 new_p.append(deepcopy(first_pPr))
@@ -378,8 +389,11 @@ def fill_from_yaml(template: Path, content_yaml: Path, output: Path) -> None:
     with open(content_yaml, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
-    korean_font = cfg.get("protections", {}).get("korean_font", DEFAULT_KOREAN_FONT)
-    filler = FormFiller(template, korean_font=korean_font)
+    protections = cfg.get("protections", {}) or {}
+    korean_font = protections.get("korean_font", DEFAULT_KOREAN_FONT)
+    blank_between = protections.get("blank_between_paragraphs", True)
+    filler = FormFiller(template, korean_font=korean_font,
+                         blank_between_paragraphs=blank_between)
 
     # Fill table key-value pairs
     for label, value in (cfg.get("table_kv") or {}).items():
