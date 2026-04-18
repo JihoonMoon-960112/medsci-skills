@@ -124,21 +124,40 @@ Auto-detect type from the research question or accept user specification.
 
 ### Phase 3: Screening & Selection
 
-**Goal**: Systematic title/abstract and full-text screening.
+**Goal**: Systematic title/abstract and full-text screening with two independent reviewers.
 
-#### 3a. 1st Screening (Title/Abstract)
+#### 3a. Round 1 — Initial Title/Abstract Screening (single reviewer)
 1. Define exclusion codes from protocol (e.g., E1=Not target population, E2=Not intervention, E3=Ineligible type, E4=Non-human, E5=Duplicate).
 2. For each record, screen title+abstract against eligibility criteria.
-3. Mark each record as INCLUDE or EXCLUDE with reason code.
-4. Output: Screening spreadsheet with color-coded INCLUDE (green) / EXCLUDE (red).
+3. Mark each record as INCLUDE / EXCLUDE / MAYBE with reason code.
+4. Output: `round1_{date}.tsv` with color-coded decisions.
 
-#### 3b. 2nd Screening (Full-text)
-1. For INCLUDE records, match with available PDFs.
+#### 3b. Round 2 — Dual Independent Title/Abstract Screening
+1. A second independent reviewer (or AI as a documented second-pass tool with human verification) re-screens all R1 records.
+2. Compute Cohen's kappa at title/abstract stage; report in Methods.
+3. Tag each record's `round2_tag` as INCLUDE / EXCLUDE / MAYBE based on R1+R2 agreement (MAYBE = disagreement OR either reviewer flagged uncertain).
+4. Output: `round2_{date}.tsv` (adds `round2_tag`, `round2_reason` columns).
+
+#### 3c. Round 3 — Adjudication of Disagreements (first reviewer)
+1. Build R3 sheet: all MAYBE records first, followed by INCLUDE records (which receive a brief confirmation pass).
+2. The **first reviewer** independently adjudicates each row, recording `round3_decision` (INCLUDE/EXCLUDE) and `round3_reason` (only when overturning R2).
+3. **Optional AI-assisted pre-screening** to compress R3 effort:
+   - Use `references/ai_pre_screening_template.py` (customize per project).
+   - Pre-screen produces `ai_suggestion` (INCLUDE/EXCLUDE/UNCERTAIN/CONFIRM-INCLUDE) + `ai_reason` columns.
+   - Sort priority: UNCERTAIN → EXCLUDE → INCLUDE → CONFIRM-INCLUDE.
+   - First reviewer must independently confirm or overturn every AI suggestion against the title, abstract, and (when needed) full text. AI suggestions are **not** final decisions.
+   - Methods boilerplate: "Round 3 adjudication was performed by the first reviewer with AI-assisted pre-screening ({model name and version}). The AI was prompted with the prespecified PECOS criteria and produced a suggestion plus brief justification for each record; the first reviewer independently confirmed or overturned every suggestion. AI suggestions were not used as final inclusion decisions."
+4. Output: `round3_{date}.tsv` with finalized `round3_decision`.
+
+#### 3d. Round 4 — Full-text Screening
+1. For records with `round3_decision = INCLUDE`, retrieve full-text PDFs (use `/fulltext-retrieval`).
 2. Apply full-text exclusion criteria (F1=No extractable outcome, F2=No comparative data, F3=Cannot separate target population data, F4=Inadequate sample/follow-up, F5=Full-text unavailable).
-3. Flag comparative studies for priority review.
+3. Two independent reviewers; compute Cohen's kappa at full-text stage.
+4. Resolve disagreements by consensus or third reviewer.
+5. Flag comparative studies for priority extraction.
 
-#### 3c. PRISMA Flow
-Track numbers at each stage for PRISMA flow diagram.
+#### 3e. PRISMA Flow
+Track numbers at each stage for PRISMA flow diagram (R1 → R2 → R3 → R4 → final included).
 Use `/make-figures` to generate PRISMA flow diagram when numbers are finalized.
 
 ### Phase 4: Data Extraction
