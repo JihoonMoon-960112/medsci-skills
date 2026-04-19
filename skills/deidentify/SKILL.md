@@ -106,10 +106,10 @@ The script's terminal review has three passes:
 3. **Pass 3 — Final Summary**: A table of all planned actions. The researcher can edit
    individual decisions before confirming.
 
-Coach the researcher:
-- "PHI로 분류된 컬럼은 기본적으로 익명화됩니다. 아닌 경우 'k'를 입력하세요."
-- "REVIEW_NEEDED는 스크립트가 판단하기 어려운 컬럼입니다. 샘플 값을 확인하고 결정하세요."
-- "SAFE는 PHI가 없는 컬럼입니다. 혹시 의심되면 'r'로 재검토 요청할 수 있습니다."
+Coach the researcher. Deliver these prompts in the researcher's preferred language:
+- "Columns classified as PHI are anonymized by default. Press 'k' to keep the original value."
+- "REVIEW_NEEDED are columns the script could not classify. Check the sample values and decide."
+- "SAFE means no PHI detected. Press 'r' to request re-review if any column looks suspicious."
 
 ### Phase 4: Verify and Document
 
@@ -129,7 +129,7 @@ After the script completes, help the researcher verify:
    Verify no original names, phone numbers, or RRN values remain.
 
 4. **Mapping file security**:
-   - Remind: "mapping.json에는 원본 환자정보가 포함되어 있습니다."
+   - Remind the researcher: "mapping.json contains original patient identifiers — treat it as restricted."
    - Recommend storing it separately from the de-identified data
    - File permissions are automatically set to 0600 (owner-only)
 
@@ -175,7 +175,7 @@ Customize based on the actual audit log statistics.
 **Supported (v1)**:
 - Structured tabular data: CSV, TSV, Excel (.xlsx)
 - 10 country locales with country-specific PHI patterns:
-  - Korea (kr): 주민번호, 전화번호, 이메일, 주소, 이름, 날짜
+  - Korea (kr): RRN (주민번호), phone, email, address, Hangul names, dates
   - USA (us): SSN, US phone, US address, zip codes
   - Japan (jp): マイナンバー, Japanese phone, 都道府県 address, Kanji names
   - China (cn): 身份证号, Chinese phone, 省市区 address, Chinese names

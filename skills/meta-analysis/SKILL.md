@@ -33,6 +33,8 @@ with specialized support for diagnostic test accuracy (DTA) meta-analyses.
   - `PROBAST.md` -- 4 domains + AI extension + validation studies
   - `NOS.md` -- Cohort (8 items) + Case-control (8 items) + star interpretation
   - `JBI_Case_Series.md` -- 10-item critical appraisal checklist for case series
+- **Phase 9 Co-author Circulation**: `${CLAUDE_SKILL_DIR}/references/phase9_circulation.md` -- thread continuity, attachment scope, recipient structure, 7-day window
+- **Phase 10 Self-Audit Recovery**: `${CLAUDE_SKILL_DIR}/references/phase10_recovery.md` -- trigger conditions, 12-step rebuild sprint, PROSPERO amendment, re-circulation framing
 
 ---
 
@@ -186,48 +188,15 @@ Generate a data extraction form with:
 
 Output: Excel/CSV template for data entry.
 
-#### 4b. KM Curve Reconstruction (when raw events not reported)
+#### 4b. Special cases (KM reconstruction, composite exposure)
 
-When studies report outcomes only as Kaplan-Meier curves without raw event counts:
-
-1. **Digitise the KM curve**: Use WebPlotDigitizer (https://automeris.io/WebPlotDigitizer/)
-   - Calibrate X/Y axes carefully — verify output range matches the original axis labels
-   - If coordinates come out in 0–1 range, multiply X by the actual time range (e.g., ×30 for months)
-   - Clip negative Y values to 0 (digitisation artifact)
-   - Export as CSV: `time, cumulative_event_rate` (or survival)
-
-2. **Extract number-at-risk**: Record from the table below the KM plot at each time point.
-
-3. **Reconstruct IPD**: Use the R `IPDfromKM` package (Guyot et al. 2012 method):
-   ```r
-   library(IPDfromKM)
-   dat <- read.csv("digitised_curve.csv")
-   preproc <- preprocess(dat, trisk, nrisk, totalpts, maxy = 1)
-   ipd <- getIPD(preproc, armID = 1)  # armID starts at 1, NOT 0
-   ```
-   - ⚠️ `preprocess()` does NOT accept a `mateflag` parameter (common error)
-   - ⚠️ `armID` starts at 1 (not 0)
-
-4. **Verify**: Generate a reconstructed KM plot and visually compare to the original figure.
-
-5. **Report in Methods**: Cite Guyot et al. 2012 (doi:10.1186/1471-2288-12-9) and
-   state which studies required reconstruction.
-
-**Alternative — Text-based extraction**: When no subgroup-specific KM curve exists but the
-text reports "0% LTP at 12 months" or similar, extract directly from text. Document the
-page number and exact quote.
-
-#### Composite Exposure Disaggregation
-
-When a study's intervention is a composite of multiple techniques:
-
-1. **Subgroup-specific KM curve** → use KM reconstruction (section 4b)
-2. **Component-specific Table/multivariate** → extract per-component data from Tables
-3. **Text-based subgroup report** → extract from narrative (e.g., "APE arm: 0% LTP")
-4. **None available** → include as composite, flag in sensitivity analysis for exclusion
-
-Always pre-specify a sensitivity analysis excluding composite-exposure studies.
-Document the extraction strategy in the data extraction form Notes column.
+When studies report outcomes only as Kaplan-Meier curves (no raw event counts) or
+when the intervention is a composite of multiple techniques, load
+`${CLAUDE_SKILL_DIR}/references/phase4_km_composite.md` for the WebPlotDigitizer
+→ `IPDfromKM` reconstruction procedure (cite Guyot et al. 2012,
+doi:10.1186/1471-2288-12-9) and the 4-path composite-exposure disaggregation
+decision tree. Pre-specify a sensitivity analysis excluding composite-exposure
+studies and document extraction strategy in the form's Notes column.
 
 #### Data Extraction Cross-Verification
 
@@ -272,132 +241,31 @@ For AI/ML prediction models, also apply PROBAST+AI extensions.
 **Goal**: Execute meta-analysis and generate publication-ready outputs.
 
 **IMPORTANT**: Always use R for meta-analysis (packages: `meta`, `metafor`, `mada`).
-See `${CLAUDE_SKILL_DIR}/references/r_templates.md` for code templates.
+See `${CLAUDE_SKILL_DIR}/references/r_templates.md` for full code templates.
 
-#### DTA Meta-Analysis (R code):
+| Analysis family | Primary tool | Key output |
+|-----------------|-------------|-----------|
+| DTA | `mada::reitsma()` (bivariate) | Pooled Se/Sp + SROC with confidence/prediction regions |
+| Intervention | `meta::metagen()` / `meta::metabin()` | Pooled OR/RR, I², Egger's test, leave-one-out |
+| Dual (comparative + single-arm) | `metabin` + `metaprop` | PRIMARY vs SECONDARY per pre-specified protocol |
 
-```r
-library(mada)      # bivariate model, forest/SROC plots
-library(meta)      # general meta-analysis utilities
-library(metafor)   # advanced models
-
-# Bivariate model (recommended for DTA)
-fit <- reitsma(data, formula = cbind(tsens, tfpr) ~ 1)
-summary(fit)
-
-# SROC curve with confidence and prediction regions
-plot(fit, sroclwd = 2, main = "SROC Curve")
-
-# Forest plot (paired: sensitivity + specificity)
-forest(fit, type = "sens")
-forest(fit, type = "spec")
-```
-
-Key outputs for DTA:
-- Pooled sensitivity (95% CI)
-- Pooled specificity (95% CI)
-- Pooled positive LR, negative LR
-- Pooled DOR
-- SROC curve with AUC, confidence region, prediction region
-- Heterogeneity: I-squared for sensitivity and specificity separately
-- Threshold effect: Spearman correlation between sensitivity and FPR
-
-#### Intervention Meta-Analysis (R code):
-
-```r
-library(meta)
-library(metafor)
-
-res <- metagen(TE, seTE, data = dat, studlab = study,
-               method.tau = "REML", sm = "OR")
-forest(res)
-funnel(res)
-
-summary(res)  # I-squared, tau-squared, Q test
-metabias(res, method.bias = "Egger")
-metainf(res, pooled = "random")  # leave-one-out
-```
-
-#### Dual Approach: Comparative + Single-Arm Pooled Proportion
-
-When both comparative and single-arm studies are available, use dual analysis
-(precedent: Lin 2025 PMID:41419890, Su 2026 PMID:41653198).
-The assignment of PRIMARY vs SECONDARY depends on the research question and
-available evidence:
-
-| Scenario | Primary | Secondary | Rationale |
-|----------|---------|-----------|-----------|
-| Enough comparative studies (k≥8) | Comparative OR/RR | Pooled proportion | Direct comparison answers efficacy |
-| Limited comparative (k<6), many single-arm | Pooled proportion | Comparative OR/RR | Insufficient power for comparative; pooled proportion provides descriptive evidence |
-| Mixed (moderate k, each) | Discuss with co-authors | — | PI/methodologist decision |
-
-The choice should be pre-specified in the PROSPERO protocol and remain consistent
-throughout the manuscript.
-
-```r
-# Comparative MA (binary outcomes)
-res_comp <- metabin(ei, ni, ec, nc, data = dat,
-                     studlab = study, sm = "OR",
-                     method = "Inverse", method.tau = "DL",
-                     common = FALSE, random = TRUE,
-                     method.random.ci = "HK", incr = 0.5)
-
-# Single-arm pooled proportion
-res_prop <- metaprop(event, n, data = dat_single,
-                      studlab = study, sm = "PLOGIT",
-                      method.tau = "DL", method.ci = "CP")
-```
-
-Key points:
-- Comparative answers "is adjunct effective?" -- single-arm answers "what outcomes to expect?"
-- Single-arm uses `metaprop()` with logit transformation + Clopper-Pearson CI
-- GRADE certainty lower for single-arm -- state explicitly
-- Report both in Results: label PRIMARY/SECONDARY per pre-specified assignment
-- **Selection bias warning**: Single-arm case series may introduce selection bias (experienced centres, favourable patients). When pooling with comparative arms, report both pooled estimates separately and discuss any numerically lower event rate in single-arm studies as a potential selection effect.
-
-#### Practical R Notes:
-- Use `method = "Inverse"` not `"MH"` to avoid method.tau conflict
-- Use `method.tau = "DL"` (DerSimonian-Laird) -- REML may not converge with sparse data
-- Use `method.random.ci = "HK"` (Hartung-Knapp) instead of deprecated `hakn = TRUE`
-- Use `common = FALSE, random = TRUE` instead of deprecated `comb.fixed/comb.random`
-- For zero cells, `incr = 0.5` continuity correction
-- Egger's test underpowered for k < 10 -- note this in results
-
-#### Subgroup / Meta-Regression:
-- Subgroup analysis for pre-specified covariates
-- Meta-regression for continuous moderators
-- Report interaction test p-value, not just within-subgroup p-values
-
-#### Publication Bias:
-- DTA: Deeks' funnel plot asymmetry test (standard funnel plots inappropriate for DTA)
-- Intervention: Funnel plot + Egger's or Peters' test
-- Note: Tests underpowered for <10 studies
-
-#### Sensitivity Analysis:
-- Leave-one-out analysis (`metainf()`)
-- Excluding high RoB studies
-- Excluding overlapping populations (same institution + enrollment period)
-- Including/excluding borderline studies (sensitivity to inclusion criteria)
-- Alternative model specifications
-
-#### Error Handling:
-- If R script fails, capture the error message, diagnose the likely cause (missing package,
-  data format mismatch, convergence failure), and present a fix. Do not silently re-run.
-- When reporting R output, separate statistical results (pooled estimates, heterogeneity
-  metrics, I-squared) from interpretation. Present numbers first in a "Statistical Results"
-  block, then interpretation guidance in a separate "Interpretation Notes" block.
+**Load-on-demand**: Read `${CLAUDE_SKILL_DIR}/references/phase6_statistical_synthesis.md`
+for the full R code templates, the dual-approach decision table (comparative vs
+single-arm), practical cautions (method.tau, HK CI, zero-cell correction),
+publication-bias test power, sensitivity-analysis menu, and error-handling rules.
 
 ### Phase 6b: Post-Analysis Source Fidelity Audit (MANDATORY)
 
 **Goal**: Catch numerical hallucinations that survived the forward pipeline (CSV → .R → manuscript).
 
-**Precedent incident** — treat this as a near-miss, not hypothetical:
-> CBCT Ablation MA-2 (2026-04-19) stated "Du 2023 pneumothorax-requiring-drainage 3/45 CBCT
-> vs 0/56 CT, p=0.085." Actual Table 3 values were "0/45 CBCT vs 1/56 CT, p=0.37" — direction
-> reversed. CSV was correct; the R script's Fisher exact `matrix()` was hand-typed after
-> misreading the CTCAE-Grade column. Internal consistency passed; source fidelity was never
-> checked. Caught on a second-pass peer review the user explicitly requested with random
-> extraction sampling.
+**Precedent failure pattern** — treat this as a lived near-miss, not hypothetical:
+> In a revision-era comparative meta-analysis, a safety outcome was reported as "3/45 vs
+> 0/56, p=0.085." The primary-source Table actually recorded "0/45 vs 1/56, p=0.37" —
+> direction reversed. The extraction CSV was correct; the R script's Fisher exact
+> `matrix()` was hand-typed after a column in the source Table was misread. Internal
+> consistency checks passed because every downstream artifact (Abstract, Discussion,
+> Table, forest caption) echoed the same wrong number. The reversal was caught only on
+> a second-pass audit with random extraction sampling against the primary paper.
 
 **Non-negotiable rules:**
 
@@ -408,14 +276,16 @@ Key points:
      `data.frame` line MUST carry a comment citing the exact CSV row + column OR the exact
      primary-source Table/Page coordinate. Example:
      ```r
-     # source: data_extraction_final.csv row 23 (Du 2023), cols PTX_drain_CBCT=0, PTX_drain_cCT=1
+     # source: data_extraction_final.csv row <N> (<first-author> <year>), cols <event_arm1>=0, <event_arm2>=1
+     # verified against primary source Table <X>, page <P>
      fisher.test(matrix(c(0, 45, 1, 55), nrow = 2, byrow = FALSE))
      ```
 
 2. **Comparative-arm subsets are a separate consensus-log row.**
-   - When one study (e.g., Du 2023 CBCT arm only) is used in a comparative analysis while the
-     full cohort appears elsewhere, `extraction_consensus_log.md` must carry an explicit row
-     for the arm-specific values. Pooled totals and arm-specific values MUST NOT share a row.
+   - When one study's arm-specific values (e.g., one arm of a multi-arm study) are used in a
+     comparative analysis while the full cohort of that study appears elsewhere,
+     `extraction_consensus_log.md` must carry an explicit row for the arm-specific values.
+     Pooled totals and arm-specific values MUST NOT share a row.
 
 3. **Random 3-claim back-check before closing Phase 6.**
    - After the forest/funnel/subgroup outputs stabilize, randomly sample 3 numerical claims
@@ -434,8 +304,8 @@ Key points:
      Phase 2.5a audit in `/self-review` clears it.
 
 **When this phase triggers:** every time Phase 6 outputs change (first draft, revision, reviewer-
-requested re-analysis). Not optional on "minor" re-runs — the Du 2023 error occurred on a
-"minor" revision analysis.
+requested re-analysis). Not optional on "minor" re-runs — the precedent reversal above
+occurred inside a "minor" revision-era re-analysis.
 
 ### Phase 7: GRADE / Certainty of Evidence
 
@@ -472,6 +342,67 @@ Output: Summary of Findings table.
 
 ---
 
+### Phase 9: Co-author Circulation
+
+**Goal**: Standardized pre-submission circulation of the manuscript to co-authors and
+senior methodologist / reviewer, with a bounded review window and a controlled attachment
+scope.
+
+**Trigger**: Phase 8 is complete, and the draft has cleared Phase 6b source-fidelity
+audit.
+
+**Summary**: Reply to the prior-version email thread to preserve `In-Reply-To` continuity
+(v1 → v2 → v3 tracked in one place). Attach the manuscript body with figures inline and,
+for v≥2, a change summary — exclude graphical abstract, cover letter, COI forms, and
+supplementary until the target journal is confirmed. TO = corresponding author + one
+senior methodologist; CC = remaining co-authors. Set a 7-day deadline (5 business days +
+weekend). Ask the corresponding author for target-journal preference, reviewer candidates,
+and cover-letter framing.
+
+**Load-on-demand procedural detail** (thread continuity, attachment scope rationale,
+size-to-method table, journal-undetermined framing, response-tracking log):
+`${CLAUDE_SKILL_DIR}/references/phase9_circulation.md`.
+
+---
+
+### Phase 10: Self-Audit Recovery (v{N} → v{N+1} sprint)
+
+**Goal**: When an audit uncovers a structural data or protocol-application error,
+withdraw the current version, rebuild, and re-circulate with a transparent audit trail.
+Catching the error yourself before a journal reviewer does is the principal trust-building
+move in this phase.
+
+**Trigger conditions (any one):**
+
+| # | Trigger | Source |
+|---|---------|--------|
+| T1 | Extraction CSV ↔ primary source disagreement for a cell feeding a pooled/subgroup estimate or reported proportion | Phase 6b audit |
+| T2 | Included/excluded study violates the pre-specified criteria on re-read | Protocol review |
+| T3 | Hand-typed numerical literal in the analysis script traces to a wrong value | Phase 6b audit |
+| T4 | PROSPERO protocol ↔ delivered analysis disagreement on outcome, subgroup, or eligibility | Protocol ↔ analysis diff |
+| T5 | Dual-reviewer consensus record ↔ locked dataset disagreement on inclusion | Consensus log diff |
+
+**Non-negotiable rule**: if the trigger fires after Phase 9 circulation but before
+journal submission, withdraw the current version within 24 hours. Reviewer discovery is
+a strictly worse failure mode than self-withdrawal.
+
+**Sprint outline (12 steps)**: (10.1) audit log at `qc/audit_vN_to_vNplus1.md` →
+(10.2) CSV re-verification with `[VERIFY-CSV]` tagging → (10.3) fresh script re-run
+(fixed seed, logged) → (10.4) manuscript auto-sync (grep for v{N} residue) → (10.5)
+supplementary regeneration (consensus log, RoB, GRADE/SoF, PRISMA flow) → (10.6) figure
+regeneration via `/make-figures` → (10.7) change summary with delta table → (10.8)
+PROSPERO amendment (application correction, not criteria change) → (10.9) re-circulation
+in the Phase 9 thread with the "On re-review" framing → (10.10) anti-patterns to avoid
+(hide-and-submit, "minor revision" reframe, cover-letter-only disclosure) → (10.11) post-
+submission escalation path → (10.12) post-recovery loop (Phase 9 restart; tighten Phase
+6b if a second sprint is needed).
+
+**Load-on-demand procedural detail** (exact audit-log fields, delta-table template,
+amendment language template, re-circulation paragraph template, anti-pattern rationale):
+`${CLAUDE_SKILL_DIR}/references/phase10_recovery.md`.
+
+---
+
 ## DTA-Specific Pitfalls (Always Check)
 
 | Pitfall | Problem | Solution |
@@ -504,9 +435,11 @@ When the number of included studies is small (< 10):
 | Need literature search | `/search-lit` | PubMed/Semantic Scholar search with verified citations |
 | Need statistical code | `/analyze-stats` | Execute R/Python analysis scripts |
 | Need figures | `/make-figures` | PRISMA flow, forest plots, SROC, funnel plots |
-| Need reporting check | `/check-reporting` | PRISMA-DTA / PRISMA 2020 compliance |
+| Need reporting check | `/check-reporting` | PRISMA-DTA / PRISMA 2020 compliance (includes Step 4c registration / amendment timing) |
 | Need manuscript writing | `/write-paper` | Full IMRAD manuscript generation |
 | Need self-review | `/self-review` | Pre-submission quality check |
+| Co-author circulation (Phase 9) | `/gws` + `/handoff` | Thread-reply send, deadline task registration |
+| Self-audit recovery entrypoint (Phase 10) | `/write-paper` Step 7.4a | Recovery branch for polish pipelines that surface structural audit failures |
 
 ---
 

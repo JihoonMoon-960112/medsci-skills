@@ -20,15 +20,16 @@ Determine the mode from user input:
 
 | Signal | Mode |
 |--------|------|
-| 교수님 이름 / profile URL 제공 | **A: Professor-first** |
-| 임상 질문, 키워드, 트렌드, "주제 찾아줘" | **B: Topic-first** |
-| 둘 다 있으면 (e.g., "이 교수님한테 이 주제로") | **A** (topic as filter) |
+| Professor name or profile URL provided | **A: Professor-first** |
+| Clinical question, keyword, trend, or "find me a topic" | **B: Topic-first** |
+| Both supplied (e.g., "this topic with this professor") | **A** (topic as filter) |
 
-If ambiguous, ask: "교수님 기반으로 찾을까요, 주제 기반으로 찾을까요?"
+If ambiguous, ask the user whether to search by professor (supervisor-first) or by
+topic (question-first).
 
 ## Communication Rules
 
-- Communicate with the user in Korean.
+- Communicate with the user in their preferred language (typically Korean).
 - Research questions, PICO/PIRD, and README content in English.
 - Medical terminology always in English.
 
@@ -37,18 +38,18 @@ If ambiguous, ask: "교수님 기반으로 찾을까요, 주제 기반으로 찾
 ## Inputs
 
 ### Mode A: Professor-first
-- Professor name (Korean + English)
+- Professor name (native-language + English)
 - Profile URL (ScholarWorks, SKKU Faculty, Google Scholar, ORCID)
 - PubMed author link (preferably with cauthor_id for disambiguation)
-- Known specialty (e.g., "흉부영상", "복부영상")
+- Known specialty (e.g., "thoracic imaging", "abdominal imaging")
 - Affiliation history (e.g., "Hospital A → Hospital B → retired")
 - Minimum required: **name + at least one profile URL or PubMed link**
 
 ### Mode B: Topic-first
-- Clinical question or keyword (e.g., "AI로 폐결절 악성도 예측", "dual-energy CT body composition")
-- Radiology subspecialty scope (e.g., "흉부", "복부", "신경")
+- Clinical question or keyword (e.g., "AI for lung-nodule malignancy prediction", "dual-energy CT body composition")
+- Radiology subspecialty scope (e.g., thoracic, abdominal, neuro)
 - MA type preference (DTA, prognostic, intervention — optional)
-- Desired role: 1저자 단독 / co-first / 교수님 매칭 희망
+- Desired role: solo first author / co-first / supervisor-matched
 - Minimum required: **clinical question or keyword**
 
 ---
@@ -77,7 +78,9 @@ If ambiguous, ask: "교수님 기반으로 찾을까요, 주제 기반으로 찾
    - First search must be `"[Full Name]"[Author]` (e.g., `"Ha Hyun Kwon"[Author]`)
 
 2. **Confirm affiliation chain with user:**
-   - Ask: "교수님 소속 이력이 {확인된 소속}이 맞나요? 관계도 알려주시면 주제 제안에 반영하겠습니다."
+   - Ask the user whether `{detected affiliation}` matches the professor's history,
+     and request the user's relationship to the professor so topic proposals can be
+     tuned accordingly.
    - This prevents wrong-institution assumptions
    - Skip only if user already provided explicit affiliation history
 
@@ -221,7 +224,7 @@ server: "medrxiv"  (for clinical topics)
 - Raw PubMed hit count is NOT the real k — most studies lack 2x2 data or HR
 - Apply conservative discount: **k_realistic ≈ raw_count × 0.15–0.30** for DTA topics
 - Flag if k_realistic < 8 (DTA) or < 6 (prognostic) as ⚠️ feasibility risk
-- Report both: `추정 k: ~130편 (raw) → ~20-40편 (DTA 추출 가능 추정)`
+- Report both raw and realistic estimates, e.g., `estimated k: ~130 (raw) → ~20–40 (extractable DTA data)`
 
 #### 2h. Niche subtopic discovery (if pillar appears saturated)
 
@@ -241,17 +244,17 @@ Score each candidate on 5 criteria (★1-5):
 
 | Criteria | Weight | Description |
 |----------|--------|-------------|
-| **Professor fit** | 최고 | 교수님 커리어 핵심 영역인가, 논문 수, 독보적 기여 |
-| **MA gap** | 높음 | 기존 MA 없음 > 5년 이상 경과 > 최근 MA 존재 |
-| **Feasibility (k)** | 높음 | 포함 가능 연구 수, 2x2 또는 HR 추출 가능성 |
-| **Clinical impact** | 중간 | 임상 의사결정에 직결되는 주제인가 |
-| **Execution ease** | 중간 | 문헌 기반만으로 완료 가능, heterogeneity 관리 난이도 |
+| **Professor fit** | Highest | Core area of the professor's career, publication count, distinctive contribution |
+| **MA gap** | High | No prior MA > ≥5 yr since last MA > recent MA exists |
+| **Feasibility (k)** | High | Number of includable studies and extractability of 2×2 or HR data |
+| **Clinical impact** | Medium | Whether the topic directly informs clinical decision-making |
+| **Execution ease** | Medium | Completable from literature alone; difficulty of managing heterogeneity |
 
 **Output: Ranked Topic Table**
 
-| 순위 | 주제 | 교수님 Pillar | 기존 MA | 추정 k (raw→realistic) | PROSPERO 경쟁 | 종합 판정 |
-|------|------|-------------|---------|----------------------|--------------|----------|
-| 1 | ... | ... | 0편 | ~98→15-30 | 없음 | ✅ 최적 |
+| Rank | Topic | Professor's Pillar | Prior MA | Estimated k (raw→realistic) | PROSPERO competition | Verdict |
+|------|-------|--------------------|----------|-----------------------------|----------------------|---------|
+| 1 | ... | ... | 0 | ~98 → 15–30 | None | ✅ Best fit |
 
 ---
 
@@ -260,87 +263,18 @@ Score each candidate on 5 criteria (★1-5):
 **Goal:** Create project folders and README for each viable topic.
 
 1. **Folder location:** `{working_dir}/ma-scout/{initials}_{professor_name}/`
-2. **Naming convention:** `{NN}_{주제약칭}/` (within professor folder)
+2. **Naming convention:** `{NN}_{topic_slug}/` (within professor folder)
    - Professor folder: `{initials}_{name}` (e.g., `KDK_Kim`, `LKS_Lee`)
    - NN: sequential number within professor (01, 02, ...)
-   - 주제약칭: English, underscore-separated
+   - topic_slug: English, underscore-separated
    - Check existing folders with `ls` before creating
 
 3. **README.md template (PROSPERO-ready):**
-
-   ```markdown
-   # {Topic Title} — {MA Type} Meta-analysis ({교수님 성함})
-
-   ## Overview
-   - Supervisor: {교수님 성함} ({소속 이력})
-   - 교수님 영역: Pillar {N} — {영역명}
-   - Status: 기획 단계
-   - Priority: {순위}순위
-   - Created: {YYYY-MM-DD}
-
-   ## Research Question
-   ### PICO/PIRD
-   - **P**opulation: {구체적 환자군, 질환, 세팅}
-   - **I**ndex test / Intervention: {검사법 또는 중재}
-   - **C**omparator / Reference standard: {비교군 또는 참조표준}
-   - **O**utcome: {DTA: Se/Sp/AUC, Prognostic: HR/OR, 부작용 등}
-
-   ### One-line RQ
-   {완성형 연구 질문 1문장}
-
-   ## Key Gap
-   - 기존 MA: {N}편 ({상세, 가장 최근 연도, 범위 한계})
-   - Consensus/Scholar Gateway 추가 확인: {결과 요약}
-   - medRxiv/bioRxiv preprint MA: {있음/없음}
-   - PROSPERO 등록 프로토콜: {있음 (CRD#) / 없음}
-   - {구체적 gap 설명 — 왜 새 MA가 필요한지}
-
-   ## Professor's Authority
-   - {분야 관련 논문 수, 대표 논문 1-2편, 독보적 기여}
-   - {왜 이 교수님이 이 주제에 적합한지}
-
-   ## Preliminary Search ({날짜})
-   ### Search Strategy (PubMed)
-   ```
-   {실제 사용한 PubMed 검색식 — E-utilities esearch query 그대로}
-   ```
-   - Total hits: {N}편 (raw)
-   - DTA/outcome extractable (estimated): {N}편 (×0.15-0.30 discount)
-   - 기존 MA: {N}편 (narrow) / {N}편 (broad SR 포함)
-   - Consensus 검색 결과: {N}편 추가 발견 여부
-   - bioRxiv/medRxiv: {N}편 preprint
-
-   ### Embase Search Strategy (Draft)
-   ```
-   {Embase용 검색식 초안 — Emtree 용어 포함}
-   ```
-   (실행 전 초안 — Embase 접속 시 검증 필요)
-
-   ## Target Journal
-   | 순위 | 저널명 | IF | MA 게재 비율 | Turnaround | 비고 |
-   |------|--------|-----|-------------|-----------|------|
-   | 1차 | {저널} | {IF} | {높음/중간} | {개월} | {근거} |
-   | 2차 | {저널} | {IF} | {높음/중간} | {개월} | {근거} |
-
-   ## Timeline (역산)
-   | 단계 | 예상 시점 | 선행 조건 |
-   |------|----------|----------|
-   | 교수님 제안 | {YYYY-MM} | {조건} |
-   | PROSPERO 등록 | +1주 | 교수님 승인 |
-   | 검색 완료 | +2주 | PROSPERO 등록 |
-   | 스크리닝 완료 | +3주 | 2nd reviewer 확보 |
-   | 데이터 추출 | +4주 | 스크리닝 합의 |
-   | 분석 + 초안 | +6주 | 데이터 lock |
-   | 교수님 리뷰 | +8주 | 초안 완성 |
-   | 투고 | +10주 | 교수님 승인 |
-
-   ## Data Sources Used
-   - PubMed E-utilities: ✅ (esearch count + efetch metadata)
-   - Consensus MCP: ✅/❌
-   - Scholar Gateway: ✅/❌
-   - bioRxiv/medRxiv: ✅/❌
-   - PROSPERO: ✅
-   ```
+   Load the bilingual template block from
+   `${CLAUDE_SKILL_DIR}/references/project_readme_template.md` and copy it into
+   `{topic_folder}/README.md`. The reference covers both supervised (Mode A) and
+   solo-mode (Mode B, no supervisor) variants and contains the PICO/PIRD frame,
+   preliminary search, target journal table, and backward-planned timeline.
 
 ---
 
@@ -356,14 +290,14 @@ Score each candidate on 5 criteria (★1-5):
 
 ## Niche Topic Discovery Heuristics
 
-When all major pillars are saturated (MA >5편), try these angles:
+When all major pillars are saturated (>5 prior MAs), try these angles:
 
-1. **"첫 번째 MA" rule:** Professor's most unique/niche subtopic where MA = 0
+1. **"First MA" rule:** Professor's most unique/niche subtopic where MA = 0
 2. **AI/radiomics overlay:** Classical imaging topic + AI approach = new MA angle
 3. **Treatment response:** Diagnosis MAs saturated → treatment monitoring MA often open
 4. **Modality comparison:** Head-to-head (e.g., CEUS vs MRI) often underserved
 5. **Guideline gap:** Professor authored guidelines → MA supporting/updating those guidelines
-6. **Geographic/population niche:** Korean/Asian population-specific MA (e.g., parasitic diseases, TB)
+6. **Geographic/population niche:** Regional population-specific MA (e.g., parasitic diseases, TB)
 7. **Temporal update:** Last MA >5 years old + significant new primary studies since
 
 ---
@@ -468,12 +402,12 @@ Total (Mode B): ~5-8 minutes per topic scan (faster than Mode A — no profile e
 
 2. **Expand to neighboring angles** — propose 3-5 variations:
    ```
-   사용자 입력: "AI로 폐결절 악성도 예측"
-   → 변형 1: AI vs radiologist for lung nodule malignancy prediction (DTA)
-   → 변형 2: Radiomics for lung nodule malignancy (DTA)
-   → 변형 3: Deep learning for incidental pulmonary nodule management (prognostic)
-   → 변형 4: AI-assisted Lung-RADS upgrade accuracy (DTA)
-   → 변형 5: Low-dose CT AI for lung cancer screening (DTA)
+   user input: "AI for lung nodule malignancy prediction"
+   → variant 1: AI vs radiologist for lung nodule malignancy prediction (DTA)
+   → variant 2: Radiomics for lung nodule malignancy (DTA)
+   → variant 3: Deep learning for incidental pulmonary nodule management (prognostic)
+   → variant 4: AI-assisted Lung-RADS upgrade accuracy (DTA)
+   → variant 5: Low-dose CT AI for lung cancer screening (DTA)
    ```
 
 3. **User selects 1-3 angles** to investigate further.
@@ -580,7 +514,7 @@ Then:
 - Still need 2nd reviewer (junior colleague or peer) — flag this in README
 - Corresponding author = user
 
-**Output:** Co-author recommendation table or "단독 진행 가능" judgment.
+**Output:** Co-author recommendation table or a "solo-viable" judgment.
 
 ---
 
@@ -593,22 +527,23 @@ Then:
    - Naming: `{NN}_{Topic_Abbreviation}/` (e.g., `01_AI_Lung_Nodule_DTA/`)
    - If co-author matched later, can be moved under professor folder
 
-2. **README.md template:** Same PROSPERO-ready template as Mode A Phase 4, with these changes:
+2. **README.md template:** Same PROSPERO-ready template as Mode A Phase 4 (see
+   `references/project_readme_template.md`), with these changes:
    - `Supervisor:` → `Lead: {user_name}` or `Lead: {user_name} + {co-author}`
-   - `교수님 영역:` → `Domain: {subspecialty}`
-   - `Professor's Authority` → `Team Expertise` (user's credentials + co-author if any)
-   - Timeline: no "교수님 제안" step → starts directly at "PROSPERO 등록"
+   - Drop the supervisor-area row; use `Domain: {subspecialty}` instead.
+   - Rename `Professor's Authority` → `Team Expertise` (user's credentials + co-author if any)
+   - Timeline: drop the supervisor-proposal step → start directly at PROSPERO registration.
 
    **Timeline template (self-led):**
-   | 단계 | 예상 시점 | 선행 조건 |
-   |------|----------|----------|
-   | PROSPERO 등록 | {YYYY-MM} | 주제 확정 |
-   | 검색 완료 | +1주 | PROSPERO 등록 |
-   | 스크리닝 완료 | +2주 | 2nd reviewer 확보 |
-   | 데이터 추출 | +3주 | 스크리닝 합의 |
-   | 분석 + 초안 | +5주 | 데이터 lock |
-   | Co-author 리뷰 | +7주 | 초안 완성 |
-   | 투고 | +8주 | 최종 승인 |
+   | Step | Expected timing | Precondition |
+   |------|-----------------|--------------|
+   | PROSPERO registration | {YYYY-MM} | topic confirmed |
+   | Search complete | +1 week | PROSPERO registration |
+   | Screening complete | +2 weeks | 2nd reviewer secured |
+   | Data extraction | +3 weeks | screening consensus |
+   | Analysis + draft | +5 weeks | data lock |
+   | Co-author review | +7 weeks | draft complete |
+   | Submission | +8 weeks | final approval |
 
 3. **Summary:** Same as Mode A Phase 5 — save ranked results and recommend next steps.
 
@@ -616,7 +551,7 @@ Then:
 
 ### Topic Discovery Heuristics (Mode B specific)
 
-When the user says "주제 찾아줘" without a specific idea:
+When the user asks for topic suggestions without a specific idea:
 
 1. **Trend scan** — Search recent high-IF radiology journals for "gap in the literature" + "meta-analysis needed":
    ```bash
@@ -692,9 +627,9 @@ a "ready-to-propose" package before contacting the professor.
 
 ### Professor Contact Package
 The pre-proposal gives the professor:
-- Candidate count + gap evidence ("MA=0, 35편 include")
-- Clear role description ("스크리닝 독립 검토 + discussion만")
-- PROSPERO 선점 urgency
+- Candidate count + gap evidence (e.g., "MA = 0, 35 studies to include")
+- Clear role description (e.g., "independent screening review + discussion only")
+- Urgency of PROSPERO pre-registration to secure the topic
 
 ## Anti-Hallucination
 

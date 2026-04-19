@@ -8,37 +8,46 @@ model: inherit
 
 # Literature Sync: Zotero + Obsidian Pipeline
 
-`/search-lit`의 출력(.bib)을 받아 Zotero 라이브러리와 Obsidian 문헌 노트에 자동 동기화하고, 충분한 문헌 노트가 쌓이면 교차 개념 노트를 추출한다.
+Takes the `.bib` output of `/search-lit` (or any user-specified .bib file) and
+synchronizes the references into the Zotero library and Obsidian literature notes.
+When enough literature notes accumulate, extracts cross-cutting concept notes.
+
+## Communication Rules
+
+- Communicate with the user in their preferred language (typically Korean).
+- Note template headings (`서지 정보`, `핵심 내용`, `내 생각`, `관련 노트`), vault
+  folder paths (`02 연구/문헌/`, `02 연구/개념노트/`), and Obsidian-side conventions
+  are preserved as literal template content because they match the user's existing vault.
 
 ## When to Use
 
-- `/search-lit` 완료 후 → "문헌 동기화해줘"
-- 기존 .bib 파일의 레퍼런스를 Zotero + Obsidian에 일괄 등록
-- 프로젝트 workspace의 references/ 폴더 정리
-- "개념 노트 뽑아줘" → 문헌 노트 기반 교차 개념 추출
+- After `/search-lit` completes — sync the produced .bib into Zotero + Obsidian.
+- Bulk-register references from an existing .bib into Zotero + Obsidian.
+- Tidy the `references/` folder inside a project workspace.
+- On explicit concept-extraction request → extract cross-cutting concepts from existing literature notes.
 
 ## Prerequisites
 
-- Zotero MCP server 활성화 (없으면 Zotero 단계 skip)
-- Obsidian CLI or direct file writing to the Obsidian vault
-- Obsidian vault path: configured in user's environment (e.g., `$OBSIDIAN_VAULT`)
+- Zotero MCP server available (skip the Zotero phase if not connected).
+- Obsidian CLI or direct file writing to the Obsidian vault.
+- Obsidian vault path: configured in user's environment (e.g., `$OBSIDIAN_VAULT`).
 
 ## Pipeline Overview
 
 ```
-.bib 파일 (또는 /search-lit 출력)
+.bib file (or /search-lit output)
     │
     ▼ Phase 1: Parse
-    DOI, PMID, title, authors, journal, year 추출
+    Extract DOI, PMID, title, authors, journal, year
     │
     ▼ Phase 2: Zotero Sync
-    중복 체크 → zotero_add_by_doi → 컬렉션 배치
+    Dedupe check → zotero_add_by_doi → place in collection
     │
     ▼ Phase 3: Obsidian Literature Notes
-    02 연구/문헌/{citekey}.md 생성 (빈 노트 OK — 나중에 하이라이트 추가)
+    Create 02 연구/문헌/{citekey}.md (empty note OK — fill later with highlights)
     │
-    ▼ Phase 4: Concept Extraction (조건부)
-    문헌 노트 10개 이상 → 교차 개념 스캔 → 개념 노트 제안
+    ▼ Phase 4: Concept Extraction (conditional)
+    ≥10 literature notes → scan for cross-cutting concepts → propose concept notes
 ```
 
 ---
@@ -47,13 +56,13 @@ model: inherit
 
 ### Input
 
-사용자가 지정한 .bib 파일 경로, 또는 방금 `/search-lit`이 생성한 .bib.
+The user-specified .bib file path, or the .bib just produced by `/search-lit`.
 
 ### Process
 
 ```python
-# .bib 파일에서 엔트리 파싱 (정규식 기반)
-# 각 엔트리에서 추출:
+# Parse .bib entries with regex.
+# Extract per entry:
 #   - citekey (e.g., Kim_2024_Validation)
 #   - doi
 #   - pmid
@@ -61,31 +70,35 @@ model: inherit
 #   - authors (first + last minimum)
 #   - journal
 #   - year
-#   - volume, number, pages (있으면)
+#   - volume, number, pages (if present)
 ```
 
-파싱 실패한 엔트리는 로그에 남기고 skip.
+Log any parse failures and skip those entries.
 
 ---
 
 ## Phase 2: Zotero Sync
 
-### Step 2.1: 프로젝트 컬렉션 결정
+### Step 2.1: Determine project collection
 
-현재 작업 디렉토리 또는 사용자 지정으로 프로젝트 판별.
-기존 컬렉션 키가 있으면 사용, 없으면 새로 생성.
+Identify the project from the current working directory or from an explicit user
+override. Reuse an existing collection key if one is recorded; otherwise create a
+new collection.
 
-**Collection mapping**: Check existing Zotero collections for the current project. If no collection exists, create one with `zotero_create_collection`. Record the collection key for future use.
+**Collection mapping**: Check existing Zotero collections for the current project.
+If no collection exists, create one with `zotero_create_collection`. Record the
+collection key for future use.
 
-### Step 2.2: 중복 체크 + 추가
+### Step 2.2: Dedupe + add
 
-각 엔트리에 대해:
+For each entry:
 
-1. `zotero_search_items`로 DOI 또는 title 검색 → 이미 있으면 skip
-2. 없으면 `zotero_add_by_doi` (DOI 있는 경우) 또는 `zotero_add_by_url` (DOI 없는 경우 PubMed URL)
-3. `zotero_manage_collections`로 해당 프로젝트 컬렉션에 배치
+1. Use `zotero_search_items` to search by DOI or title — if already present, skip.
+2. Otherwise call `zotero_add_by_doi` (when a DOI is available) or
+   `zotero_add_by_url` (falling back to the PubMed URL when no DOI is available).
+3. Use `zotero_manage_collections` to place the item in the project collection.
 
-### Step 2.3: 결과 리포트
+### Step 2.3: Result report
 
 ```
 Zotero Sync:
@@ -95,24 +108,24 @@ Zotero Sync:
   Collection: RFA-Meta (TZQEP4NH)
 ```
 
-> Zotero MCP 미연결 시 이 Phase 전체를 skip하고 Phase 3으로 진행.
+If the Zotero MCP is not connected, skip this entire phase and proceed to Phase 3.
 
 ---
 
 ## Phase 3: Obsidian Literature Notes
 
-### Step 3.1: 기존 문헌 노트 확인
+### Step 3.1: Check existing literature notes
 
 ```bash
 ls "$VAULT/02 연구/문헌/" | grep -v "📊" | wc -l
 ```
 
-### Step 3.2: 문헌 노트 생성
+### Step 3.2: Create literature notes
 
-각 .bib 엔트리에 대해 `02 연구/문헌/{citekey}.md` 생성.
-**이미 존재하면 skip** (덮어쓰지 않음).
+For each .bib entry, create `02 연구/문헌/{citekey}.md`.
+**Skip if the file already exists** (never overwrite).
 
-#### 템플릿
+#### Template
 
 ```markdown
 ---
@@ -154,14 +167,14 @@ tags:
 -
 ```
 
-**규칙:**
-- `notetype: literature` — Zotero Integration 템플릿과 호환
-- `_unread` 태그 — 나중에 Zotero에서 PDF 읽고 하이라이트 추가 시 `_read`로 변경
-- `## 핵심 내용`과 `## 내 생각`은 **빈 칸으로 남김** — 사용자가 직접 채움
-- `## 관련 노트`는 hub 2개 + 빈 슬롯 2개 (나중에 개념 노트 연결)
-- PMID 있으면 PubMed 링크 추가
+**Rules:**
+- `notetype: literature` — compatible with the Zotero Integration template.
+- `_unread` tag — change to `_read` later after the user reads the PDF in Zotero and adds highlights.
+- Leave `## 핵심 내용` and `## 내 생각` blank — the user fills these in personally.
+- `## 관련 노트` contains 2 hub links + 2 empty slots (reserved for later concept-note linking).
+- If a PMID is available, add a PubMed link.
 
-### Step 3.3: 결과 리포트
+### Step 3.3: Result report
 
 ```
 Obsidian Literature Notes:
@@ -173,120 +186,129 @@ Obsidian Literature Notes:
 
 ---
 
-## Phase 4: Concept Extraction (조건부)
+## Phase 4: Concept Extraction (conditional)
 
-### Trigger 조건
+### Trigger condition
 
-문헌 노트가 **10개 이상** 존재할 때만 실행.
-10개 미만이면 "문헌 노트 {N}개 — 10개 이상 쌓이면 개념 추출 가능" 메시지만 출력.
+Run this phase only when there are **≥10** literature notes in the vault.
+If fewer exist, print a status message like "N literature notes — concept extraction
+unlocks at ≥10" and stop.
 
-### Step 4.1: 교차 개념 스캔
+### Step 4.1: Cross-cutting concept scan
 
-Vault의 `02 연구/문헌/*.md` 전체를 읽고:
-1. 각 논문의 title, journal, tags에서 키워드 추출
-2. .bib 엔트리의 title에서 주요 개념 추출
-3. **3개 이상 문헌 노트에서 교차하는 개념** 식별
+Read all files under `02 연구/문헌/*.md`:
+1. Extract keywords from each paper's title, journal, and tags.
+2. Extract major concepts from the .bib entry titles.
+3. Identify **concepts that co-occur across ≥3 literature notes**.
 
-### Step 4.2: 필터링 (5가지 기준)
+### Step 4.2: Filtering (5 exclusion rules)
 
-개념 후보에서 제외:
-- 모델 이름 (GPT-4, Claude, etc.)
-- 데이터셋 이름 (MedQA, ImageNet, etc.)
-- 저널 이름
-- 기관 이름
-- 단순 기법 이름 (too generic)
+Exclude from concept candidates:
+- Model names (GPT-4, Claude, etc.).
+- Dataset names (MedQA, ImageNet, etc.).
+- Journal names.
+- Institution names.
+- Generic technique names (too unspecific).
 
-남는 것만 개념 노트 후보로 제안.
+Whatever remains becomes a concept-note candidate.
 
-### Step 4.3: 개념 노트 초안 생성
+### Step 4.3: Draft concept note
 
-`02 연구/개념노트/{개념 이름}.md` 생성:
+Create `02 연구/개념노트/{concept name}.md`:
 
 ```markdown
 ---
-title: "{개념 이름}"
+title: "{concept name}"
 type: concept
 tags:
   - 🧠개념
-  - {도메인 태그}
+  - {domain tag}
 aliases:
-  - {영문/한글 대체명}
+  - {English/Korean alternative name}
 related_papers:
-  - "[[{문헌노트1}]]"
-  - "[[{문헌노트2}]]"
-  - "[[{문헌노트3}]]"
+  - "[[{lit-note-1}]]"
+  - "[[{lit-note-2}]]"
+  - "[[{lit-note-3}]]"
 status: 🌱Seedling
 ---
 
-# {개념 이름}
+# {concept name}
 
 ## 정의 (My Understanding)
-> TODO: 내 말로 정리
+> TODO: write in your own words
 
 ## 왜 중요한가
-{도메인에서의 중요성 — AI가 초안 제공}
+{why the concept matters in this domain — AI supplies a draft}
 
 ## 논문별 관점
-- **[[{문헌노트1}]]**: {이 논문에서의 관점}
-- **[[{문헌노트2}]]**: {다른 각도}
-- **[[{문헌노트3}]]**: {비교/보완}
+- **[[{lit-note-1}]]**: {this paper's angle}
+- **[[{lit-note-2}]]**: {a different angle}
+- **[[{lit-note-3}]]**: {comparison / complement}
 
 ## 관련 개념
-- [[{다른 개념}]]
+- [[{another concept}]]
 
 ## 열린 질문
-- {아직 답이 없는 질문 1}
-- {아직 답이 없는 질문 2}
+- {open question 1}
+- {open question 2}
 
 ## 관련 노트
 - [[🗺️ 연구 종합]]
-- [[{관련 프로젝트 허브}]]
-- [[{문헌노트1}]]
-- [[{문헌노트2}]]
+- [[{related project hub}]]
+- [[{lit-note-1}]]
+- [[{lit-note-2}]]
 ```
 
-**핵심 규칙:**
-- `## 정의` 섹션은 `> TODO` 마커 — 사용자가 직접 채워야 2층의 의미가 있음
-- status는 항상 `🌱Seedling`으로 시작
-- 관련 노트 4+ wikilinks 필수 (vault 규칙 준수)
+**Key rules:**
+- Keep the `## 정의` section as a `> TODO` marker — the 2nd-layer note only becomes
+  meaningful once the user writes the definition in their own words.
+- `status` always starts at `🌱Seedling`.
+- At least 4 wikilinks under `## 관련 노트` (vault convention).
 
-### Step 4.4: 사용자에게 제안
+### Step 4.4: Propose to the user
 
 ```
-개념 노트 후보 (3+ 문헌 교차):
+Concept-note candidates (≥3 papers cross-referenced):
   1. {Concept A} (4 papers)
   2. {Concept B} (3 papers)
   3. {Concept C} (5 papers)
 
-생성할까요? (전부 / 선택 / 건너뛰기)
+Create? (all / selected / skip)
 ```
 
-사용자 확인 후 생성. **자동 생성하되 확인은 받는다.**
+Create only after user confirmation. **Auto-draft but always confirm.**
 
 ---
 
-## Standalone 모드
+## Standalone Modes
 
-.bib 없이 독립 실행도 가능:
+This skill can run without a fresh .bib file.
 
-### "개념 노트 추출해줘"
-→ 기존 `02 연구/문헌/*.md` 스캔 → Phase 4만 실행
+### Concept extraction only
+On an explicit concept-extraction request, scan existing
+`02 연구/문헌/*.md` and run only Phase 4.
 
-### "이 프로젝트 레퍼런스 정리해줘"
-→ workspace에서 .bib 파일 탐색 → Phase 1-3 실행
+### References tidy
+On a "tidy this project's references" request, locate `.bib` files inside the
+workspace and run Phase 1–3.
 
-### "Zotero 동기화"
-→ Zotero 컬렉션과 .bib 파일 비교 → 빠진 것 추가
+### Zotero sync only
+On a "sync Zotero" request, diff the Zotero collection against the `.bib` file
+and add whatever is missing.
 
 ---
 
 ## Safety Rules
 
-1. **문헌 노트 덮어쓰기 금지** — 사용자 하이라이트/메모가 있을 수 있음
-2. **개념 노트 `## 정의` 자동 채우기 금지** — TODO 마커만 (2층의 본질은 사용자 언어)
-3. **DOI 없는 엔트리는 Zotero skip** — 수동 추가 안내
-4. **Zotero MCP 미연결 시 graceful skip** — Obsidian 노트는 독립적으로 생성
-5. **컬렉션 키는 기록** — 새 컬렉션 생성 시 사용자에게 키 보고
+1. **Never overwrite literature notes** — the user may have added highlights or
+   personal notes.
+2. **Never auto-fill `## 정의` of a concept note** — keep the TODO marker; the
+   essence of the 2nd-layer note is the user's own wording.
+3. **Skip Zotero for entries without a DOI** — ask the user to add those manually.
+4. **Gracefully skip Zotero when the MCP is not connected** — Obsidian notes are
+   created independently.
+5. **Always record the collection key** — report the key to the user when a new
+   collection is created.
 
 ## Anti-Hallucination
 
