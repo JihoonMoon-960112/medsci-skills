@@ -10,6 +10,41 @@
 
 All three profiles follow the two-tier public-library format established by `INSI.md` and include a verification note citing the 2026-04-19 user-supplied PDF as source.
 
+### Added — `/find-journal` Phase 3.6 Profile Coverage Advisory
+
+Previously, when the public profile library had a known gap for the manuscript's field,
+the ranking silently substituted adjacent journals and the user never learned that a
+better-fitting target existed. The new Phase 3.6 scans `skills/find-journal/TODO_*_profiles.md`
+files, matches their `## Field Keywords` block against the manuscript's themes, and appends
+a Coverage Advisory block between the comparison note and the Mandatory Disclaimer when
+a relevant TODO has still-missing journals. The advisory names the missing journals,
+cites their publisher and 1-line rationale verbatim from the TODO file, and directs the
+user to `/add-journal` with a PDF to close the gap per `POLICY.md`. No false alarms when
+no TODO is relevant.
+
+`TODO_neurointervention_profiles.md` updated with a `## Field Keywords` section so it
+feeds the advisory. Future field TODO files should follow the same convention.
+
+### Added — `/write-paper` Step 7.3a trigger 5 (reporting-quality checklist SRs)
+
+Step 7.3a Numerical Claim Audit previously fired only on pooled estimates, comparative-arm
+values, `[VERIFY-CSV]` tags, or post-v1 revisions. It missed the reporting-quality
+systematic review pattern, where all headline numbers are derived by counting cells in an
+items × studies checklist matrix (TRIPOD+AI, PROBAST+AI, CLAIM, PRISMA, STARD, CHARMS,
+ARRIVE). The same failure class applies — hand-tallied totals drift from cell-level truth
+while every downstream artifact echoes the wrong number.
+
+Trigger 5 is now mandatory whenever the manuscript reports corpus-level, study-level, or
+item-level PRESENT / PARTIAL / ABSENT / compliance counts or percentages from a checklist
+synthesis. The procedure adds five steps specific to this pattern: per-study totals
+recomputation, corpus-level Σ non-NA denominator, item-level roll-up, 3-way consistency
+(manuscript ↔ per-study JSON ↔ summary document), and a reproducible audit script that
+emits `numerical_claims_log.csv` and exits non-zero on any mismatch.
+
+Precedent: FD Occlusion AI SR v1.0 → v1.1 corpus PRESENT 61.2% → 50.8% (2026-04-19,
+~10 pp delta) survived internal consistency until manual cell-level recomputation
+exposed it. `~/.claude/rules/numerical-safety.md` updated with the companion rule.
+
 ## [2.3.0] - 2026-04-19
 
 ### Added — Numerical Hallucination Prevention Layer

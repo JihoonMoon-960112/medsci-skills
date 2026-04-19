@@ -4,6 +4,23 @@
 **Context:** Paper ① FD Occlusion AI SR 작업 중 find-journal 프로파일 집합에서 뉴로인터벤션 및 인접 영역 주요 저널들이 누락되어 있음을 확인. JNIS는 즉시 추가 완료. 나머지는 별도 세션에서 일괄 추가.
 **Working dir for the session:** `/Users/eugene/workspace/medsci-skills/skills/find-journal/references/journal_profiles/`
 
+## Field Keywords (for Coverage Advisory)
+
+These keywords are matched against a manuscript's themes (disease + modality + methodology)
+by `/find-journal` Phase 3.6. When the manuscript hits any of these, the Coverage Advisory
+output block is appended with the "Missing" list below so the user knows the public
+profile library has known gaps in this field.
+
+```
+neurointervention, neurointerventional, endovascular, mechanical thrombectomy, stroke
+thrombectomy, intracranial aneurysm, flow diverter, flow diversion, coil embolization,
+AVM, arteriovenous malformation, dural arteriovenous fistula, dAVF, carotid stenting,
+intracranial atherosclerosis, ischemic stroke, hemorrhagic stroke, intracerebral hemorrhage,
+subarachnoid hemorrhage, SAH, transient ischemic attack, TIA, cerebral small vessel disease,
+cerebrovascular imaging, angiography, DSA, neuroradiology, cerebrovascular, stroke systems
+of care, neurorehabilitation, stroke recovery, neurocritical care
+```
+
 ## 이미 존재 (확인 완료)
 - `AJNR.md` (diagnostic + interventional neuroradiology)
 - `INSI.md` (Interventional Neuroradiology, SAGE/ESMINT)

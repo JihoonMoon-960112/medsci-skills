@@ -355,6 +355,18 @@ fabricated numbers. They are different failure modes and Step 7.3 does not catch
 - The manuscript contains any `[VERIFY-CSV]` tag (from `/revise` Step 2.5 or `/meta-analysis`
   Phase 6b).
 - The current draft is a revision (post-v1).
+- The manuscript synthesizes completion of an items × studies reporting-quality checklist
+  (TRIPOD+AI, PROBAST+AI, CLAIM, PRISMA, STARD, CHARMS, ARRIVE, or similar) and reports
+  corpus-level, study-level, or item-level PRESENT / PARTIAL / ABSENT / compliance counts
+  and percentages. The matrix cells are the authoritative source; headline numbers are
+  derivations and must be recomputed from cells via code before prose drafting.
+
+**Precedent for the reporting-quality trigger:**
+> Paper ① FD Occlusion AI SR (2026-04-19, same day as CBCT MA-2): `fd_tripod_ai_summary.md`
+> v1.0 stated corpus PRESENT 61.2%; v1.1 corrected to 50.8% after cell-level recomputation
+> (delta ~10 pp). The error survived internal consistency because every downstream table,
+> figure caption, and abstract sentence echoed the hand-tallied v1.0 total. See user memory
+> `feedback_matrix_tally_verification.md`.
 
 **Procedure:**
 
@@ -383,6 +395,37 @@ fabricated numbers. They are different failure modes and Step 7.3 does not catch
 5. **Blocker policy.** A direction reversal or a significance-boundary crossing (p<0.05 ↔
    p≥0.05) is a P0 blocker — halt Step 7.4 and alert the user. Other mismatches are P1 and
    must be fixed before Step 7.6 DOCX build.
+
+6. **Reporting-quality checklist SR — additional steps (only when that trigger fires).**
+   When the audit target is an items × studies checklist synthesis, run these in addition
+   to steps 1–5:
+
+   a. **Per-study totals recomputation.** For each included study, recompute the
+      PRESENT / PARTIAL / ABSENT / NA counts from the per-study matrix cells via code.
+      Hand-tallied per-study totals in any extraction or summary file are prohibited
+      as the authoritative source and must be replaced with the recomputed values.
+
+   b. **Corpus-level denominator recomputation.** The corpus denominator is
+      Σ non-NA across studies, not K × I (where K = studies, I = items). Compute
+      corpus PRESENT % = Σ PRESENT / Σ non-NA and repeat for PARTIAL and ABSENT.
+      An NA-unaware denominator is a P1 defect because it shifts every percentage.
+
+   c. **Item-level roll-up.** For each item, count how many of K studies are PRESENT,
+      PARTIAL, ABSENT, or NA. Flag universal-ABSENT and universal-NA items —
+      these drive the Discussion paragraph and must be listed explicitly, not
+      described generally.
+
+   d. **3-way consistency.** Every headline number in the manuscript (abstract,
+      Results paragraph, Tables, Figure captions) must trace back to: manuscript
+      text ↔ per-study JSON or extraction file ↔ summary document (e.g.,
+      `*_summary.md`). All three must agree to the last decimal place.
+
+   e. **Source artifacts expected.** The audit expects to find a reproducible
+      script (e.g., `analysis/recompute_matrix_totals.py`) that loads the per-study
+      cells, recomputes every headline number from cells, emits a
+      `numerical_claims_log.csv` (claim_id | description | value | source |
+      computation), and exits non-zero on any 3-way mismatch. Absence of such a
+      script is itself a P1 finding to flag for the user.
 
 This step composes with — not replaces — `/self-review` Phase 2.5a. Run it here for pipeline
 completeness even when `/self-review` is also invoked.
