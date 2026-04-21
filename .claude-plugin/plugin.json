@@ -1,0 +1,49 @@
+{
+  "name": "medsci-skills",
+  "description": "32 medical science research skills",
+  "version": "1.0.0",
+  "author": {
+    "name": "Aperivue"
+  },
+  "license": "MIT",
+  "keywords": [
+    "medical",
+    "science",
+    "research",
+    "clinical"
+  ],
+  "skills": [
+    "./skills/add-journal",
+    "./skills/analyze-stats",
+    "./skills/author-strategy",
+    "./skills/batch-cohort",
+    "./skills/calc-sample-size",
+    "./skills/check-reporting",
+    "./skills/clean-data",
+    "./skills/cross-national",
+    "./skills/deidentify",
+    "./skills/design-study",
+    "./skills/fill-protocol",
+    "./skills/find-cohort-gap",
+    "./skills/find-journal",
+    "./skills/fulltext-retrieval",
+    "./skills/grant-builder",
+    "./skills/humanize",
+    "./skills/intake-project",
+    "./skills/lit-sync",
+    "./skills/ma-scout",
+    "./skills/make-figures",
+    "./skills/manage-project",
+    "./skills/meta-analysis",
+    "./skills/orchestrate",
+    "./skills/peer-review",
+    "./skills/present-paper",
+    "./skills/publish-skill",
+    "./skills/replicate-study",
+    "./skills/revise",
+    "./skills/search-lit",
+    "./skills/self-review",
+    "./skills/write-paper",
+    "./skills/write-protocol"
+  ]
+}
