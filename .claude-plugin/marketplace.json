@@ -1,0 +1,23 @@
+{
+  "name": "medsci-skills",
+  "id": "medsci-skills",
+  "owner": {
+    "name": "Aperivue"
+  },
+  "metadata": {
+    "description": "32 medical science research skills",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "medsci-skills",
+      "source": "./",
+      "description": "32 skills",
+      "version": "1.0.0",
+      "author": {
+        "name": "Aperivue"
+      },
+      "category": "research"
+    }
+  ]
+}
